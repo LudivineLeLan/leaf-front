@@ -1,20 +1,22 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import api from '@/api/axios'
 
 function LoginPage() {
+  const location = useLocation()
+  const successMessage = location.state?.message
   const navigate = useNavigate()
   const [formData, setFormData] = useState({ email: '', password: '' })
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
+  const handleChange = (event) => {
+    setFormData({ ...formData, [event.target.name]: event.target.value })
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
+  const handleSubmit = async (event) => {
+    event.preventDefault()
     setLoading(true)
     setError(null)
 
@@ -22,7 +24,7 @@ function LoginPage() {
       const { data } = await api.post('/auth/login', formData)
       localStorage.setItem('token', data.token)
       navigate('/search')
-    } catch (err) {
+    } catch (error) {
       setError('Email ou mot de passe incorrect')
     } finally {
       setLoading(false)
@@ -35,6 +37,12 @@ function LoginPage() {
         <h1 className="text-4xl font-bold text-green-600">Leaf 🍃</h1>
         <p className="text-gray-500 mt-2">Ta bibliothèque personnelle</p>
       </div>
+
+      {successMessage && (
+        <p className="text-green-600 text-sm text-center mb-4 bg-green-50 p-3 rounded-lg">
+          {successMessage}
+        </p>
+      )}
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
