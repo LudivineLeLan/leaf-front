@@ -1,11 +1,12 @@
 import { Navigate } from 'react-router-dom'
+import { useAuth } from '@/context/AuthContext'
 
 function ProtectedRoute({ children }) {
-  const token = document.cookie.includes('token')
+  const { user, loading } = useAuth()
 
-  if (!token) {
-    return <Navigate to="/login" />
-  }
+  if (loading) return null // ou un spinner
+
+  if (!user) return <Navigate to="/login" />
 
   return children
 }
