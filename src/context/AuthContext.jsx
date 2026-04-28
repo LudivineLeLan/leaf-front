@@ -22,12 +22,16 @@ export function AuthProvider({ children }) {
     fetchMe()
   }, [])
 
-  const login = (userData) => setUser(userData)
+const login = (userData, token) => {
+  localStorage.setItem('token', token)
+  setUser(userData)
+}
 
-  const logout = async () => {
-    await api.post('/auth/logout')
-    setUser(null)
-  }
+const logout = async () => {
+  await api.post('/auth/logout')
+  localStorage.removeItem('token')
+  setUser(null)
+}
 
   return (
     <AuthContext.Provider value={{ user, loading, login, logout }}>

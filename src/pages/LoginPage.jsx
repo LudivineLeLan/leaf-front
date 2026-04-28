@@ -2,8 +2,10 @@ import { useState } from 'react'
 import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import api from '@/api/axios'
+import { useAuth } from '@/context/AuthContext'
 
 function LoginPage() {
+  const { login } = useAuth() 
   const location = useLocation()
   const successMessage = location.state?.message
   const navigate = useNavigate()
@@ -22,9 +24,10 @@ function LoginPage() {
 
     try {
       const { data } = await api.post('/auth/login', formData)
-      localStorage.setItem('token', data.token)
+      login(data.user, data.token)
       navigate('/search')
     } catch (error) {
+      console.log('Erreur complète :', error.response)
       setError('Email ou mot de passe incorrect')
     } finally {
       setLoading(false)
