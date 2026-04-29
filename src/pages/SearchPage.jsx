@@ -38,6 +38,7 @@ function SearchPage() {
     value={query}
     onChange={(event) => handleSearch(event.target.value)}
     placeholder="Titre, auteur..."
+    style={{ paddingLeft: '2.5rem' }}
     className="w-full border border-gray-300 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
   />
 </div>
@@ -69,7 +70,8 @@ function SearchPage() {
               <p className="font-medium text-sm leading-tight line-clamp-2">{book.title}</p>
               <p className="text-xs text-gray-500">{book.authors?.join(', ')}</p>
               <button
-                className="text-xs bg-green-600 text-white px-3 py-1 rounded-full hover:bg-green-700 transition-colors whitespace-nowrap w-fit"
+                style={{ width: 'fit-content' }}
+                className="text-xs bg-green-600 text-white px-3 py-1 rounded-full hover:bg-green-700 transition-colors whitespace-nowrap"
                 onClick={() => console.log('Ajouter', book.googleBooksId)}
               >
                 Ajouter
