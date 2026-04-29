@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Search } from 'lucide-react'
+import AddButton from '@/components/AddButton'
 import api from '@/api/axios'
 
 function SearchPage() {
@@ -69,13 +70,11 @@ function SearchPage() {
             <div className="flex flex-col gap-1 flex-1 min-w-0">
               <p className="font-medium text-sm leading-tight line-clamp-2">{book.title}</p>
               <p className="text-xs text-gray-500">{book.authors?.join(', ')}</p>
-              <button
-                style={{ width: 'fit-content' }}
-                className="text-xs bg-green-600 text-white px-3 py-1 rounded-full hover:bg-green-700 transition-colors whitespace-nowrap"
-                onClick={() => console.log('Ajouter', book.googleBooksId)}
-              >
-                Ajouter
-              </button>
+              <div>
+         <div>
+  <AddButton onClick={() => console.log('Ajouter', book.googleBooksId)} />
+</div>
+            </div>
             </div>
           </div>
         ))}
