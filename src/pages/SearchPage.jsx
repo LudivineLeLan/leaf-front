@@ -1,12 +1,44 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Search } from 'lucide-react'
-import AddButton from '@/components/AddButton'
 import api from '@/api/axios'
+import AddButton from '@/components/AddButton'
 
 function SearchPage() {
   const [query, setQuery] = useState('')
+  const [debouncedQuery, setDebouncedQuery] = useState('')
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
+
+  // Attendre 500ms après la dernière frappe
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(query)
+    }, 500)
+
+    return () => clearTimeout(timer)
+  }, [query])
+
+  // Lancer la recherche uniquement sur debouncedQuery
+  useEffect(() => {
+    if (debouncedQuery.trim().length < 2) {
+      setResults([])
+      return
+    }
+
+    const fetchResults = async () => {
+      setLoading(true)
+      try {
+        const { data } = await api.get(`/books/search?q=${debouncedQuery}`)
+        setResults(data)
+      } catch (error) {
+        console.error(error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchResults()
+  }, [debouncedQuery])
 
   const handleSearch = async (value) => {
     setQuery(value)
@@ -27,24 +59,42 @@ function SearchPage() {
     }
   }
 
+  const handleAddBook = async (book) => {
+    try {
+      // 1. Importer le livre en base
+      const { data: importedBook } = await api.post('/books/import', {
+        googleBooksId: book.googleBooksId,
+        title: book.title,
+        authors: book.authors,
+        thumbnail: book.thumbnail,
+      })
+
+      // 2. Ajouter à la bibliothèque
+      await api.post(`/library/${importedBook.id}`, { status: 'to_read' })
+
+      alert(`"${book.title}" ajouté à ta bibliothèque !`)
+    } catch (error) {
+      console.error(error)
+      alert("Erreur lors de l'ajout du livre")
+    }
+  }
+
   return (
     <div className="px-4 pt-6 pb-4">
       <h1 className="text-2xl font-bold mb-4">Recherche</h1>
 
-      {/* Barre de recherche */}
-     <div className="relative mb-6 flex items-center">
-  <Search className="absolute left-3 text-gray-400 pointer-events-none" size={18} />
-  <input
-    type="text"
-    value={query}
-    onChange={(event) => handleSearch(event.target.value)}
-    placeholder="Titre, auteur..."
-    style={{ paddingLeft: '2.5rem' }}
-    className="w-full border border-gray-300 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-  />
-</div>
+      <div className="relative mb-6 flex items-center">
+        <Search className="absolute left-3 text-gray-400 pointer-events-none" size={18} />
+        <input
+          type="text"
+          value={query}
+          onChange={(event) => handleSearch(event.target.value)}
+          placeholder="Titre, auteur..."
+          style={{ paddingLeft: '2.5rem' }}
+          className="w-full border border-gray-300 rounded-xl pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+        />
+      </div>
 
-      {/* Résultats */}
       {loading && <p className="text-center text-gray-400 text-sm">Recherche...</p>}
 
       {!loading && results.length === 0 && query.length >= 2 && (
@@ -54,7 +104,6 @@ function SearchPage() {
       <div className="flex flex-col gap-4">
         {results.map((book) => (
           <div key={book.googleBooksId} className="flex gap-3 items-start">
-            {/* Cover */}
             {book.thumbnail ? (
               <img
                 src={book.thumbnail}
@@ -71,10 +120,8 @@ function SearchPage() {
               <p className="font-medium text-sm leading-tight line-clamp-2">{book.title}</p>
               <p className="text-xs text-gray-500">{book.authors?.join(', ')}</p>
               <div>
-         <div>
-  <AddButton onClick={() => console.log('Ajouter', book.googleBooksId)} />
-</div>
-            </div>
+                <AddButton onClick={() => handleAddBook(book)} />
+              </div>
             </div>
           </div>
         ))}
