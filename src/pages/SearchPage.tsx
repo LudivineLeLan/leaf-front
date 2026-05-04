@@ -3,10 +3,20 @@ import { Search } from 'lucide-react'
 import api from '@/api/axios'
 import AddButton from '@/components/AddButton'
 
+interface Book {
+  googleBooksId: string
+  title: string
+  authors: string[]
+  thumbnail: string | null
+  publishedDate: string | null
+  description: string | null
+  isInLibrary: boolean
+}
+
 function SearchPage() {
   const [query, setQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
-  const [results, setResults] = useState([])
+  const [results, setResults] = useState<Book[]>([])
   const [loading, setLoading] = useState(false)
 
   // Attendre 500ms après la dernière frappe
@@ -40,7 +50,7 @@ function SearchPage() {
     fetchResults()
   }, [debouncedQuery])
 
-  const handleSearch = async (value) => {
+  const handleSearch = async (value : string) => {
     setQuery(value)
 
     if (value.trim().length < 2) {
@@ -59,7 +69,7 @@ function SearchPage() {
     }
   }
 
-  const handleAddBook = async (book) => {
+  const handleAddBook = async (book : Book) => {
     try {
       // 1. Importer le livre en base
       const { data: importedBook } = await api.post('/books/import', {

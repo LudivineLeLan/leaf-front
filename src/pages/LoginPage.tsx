@@ -10,14 +10,14 @@ function LoginPage() {
   const successMessage = location.state?.message
   const navigate = useNavigate()
   const [formData, setFormData] = useState({ email: '', password: '' })
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  const handleChange = (event) => {
+  const handleChange = (event : React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [event.target.name]: event.target.value })
   }
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = async (event : React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setLoading(true)
     setError(null)
@@ -26,12 +26,11 @@ function LoginPage() {
       const { data } = await api.post('/auth/login', formData)
       login(data.user, data.token)
       navigate('/search')
-    } catch (error) {
-      console.log('Erreur complète :', error.response)
-      setError('Email ou mot de passe incorrect')
-    } finally {
-      setLoading(false)
-    }
+   } catch (error) {
+  setError('Email ou mot de passe incorrect')
+} finally {
+  setLoading(false)
+}
   }
 
   return (

@@ -1,5 +1,5 @@
-function AddButton({ onClick }) {
-  return (
+function AddButton({ onClick }: { onClick: () => void }) {
+    return (
     <button
       onClick={onClick}
       style={{

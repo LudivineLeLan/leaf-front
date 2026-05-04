@@ -6,21 +6,23 @@ import api from '@/api/axios'
 function RegisterPage() {
   const navigate = useNavigate()
   const [formData, setFormData] = useState({ username: '', email: '', password: '' })
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  const handleChange = (event) => {
+  const handleChange = (event : React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [event.target.name]: event.target.value })
   }
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setLoading(true)
     setError(null)
 
     try {
       await api.post('/auth/register', formData)
-navigate('/login', { state: { message: 'Compte créé avec succès ! Tu peux te connecter.' } })    } catch (error) {
+navigate('/login', { state: { message: 'Compte créé avec succès ! Tu peux te connecter.' } })    } 
+catch (err) {
+  const error = err as { response?: { data?: { error?: string } } }
       setError(error.response?.data?.error || 'Une erreur est survenue')
     } finally {
       setLoading(false)
