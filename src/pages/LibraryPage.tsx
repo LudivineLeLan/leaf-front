@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { BookMarked, BookOpen, BookCheck } from "lucide-react";
 import api from "@/api/axios"; //base URL + auth with token for each request
 
 type Status = "to_read" | "reading" | "finished";
@@ -23,10 +24,10 @@ interface UserBook {
 	book: Book | null;
 }
 
-const statusLabel: Record<Status, string> = {
-	to_read: "À lire",
-	reading: "En cours",
-	finished: "Lu",
+const statusConfig: Record<Status, { label: string; icon: React.ReactNode }> = {
+	to_read: { label: "À lire", icon: <BookMarked size={12} /> },
+	reading: { label: "En cours", icon: <BookOpen size={12} /> },
+	finished: { label: "Lu", icon: <BookCheck size={12} /> },
 };
 
 function LibraryPage() {
@@ -112,20 +113,34 @@ function LibraryPage() {
 										</p>
 									)}
 
-									<select
-										value={userBook.status}
-										onChange={(event) =>
-											handleStatusChange(
-												userBook.bookId,
-												event.target.value as Status,
-											)
-										}
-										className="text-xs text-gray-500 border border-gray-200 rounded-md px-2 py-1 mt-1 bg-white"
-									>
-										<option value="to_read">📚 À lire</option>
-										<option value="reading">📖 En cours</option>
-										<option value="finished">✅ Lu</option>
-									</select>
+									{/* Status */}
+									<div className="flex gap-2 mt-1">
+										{(Object.keys(statusConfig) as Status[]).map((s) => (
+											<button
+												type="button"
+												key={s}
+												onClick={() => handleStatusChange(userBook.bookId, s)}
+												style={{
+													display: "flex",
+													alignItems: "center",
+													gap: "4px",
+													padding: "2px 8px",
+													borderRadius: "999px",
+													fontSize: "11px",
+													border: "1px solid",
+													cursor: "pointer",
+													backgroundColor:
+														userBook.status === s ? "#16a34a" : "transparent",
+													color: userBook.status === s ? "white" : "#9ca3af",
+													borderColor:
+														userBook.status === s ? "#16a34a" : "#e5e7eb",
+												}}
+											>
+												{statusConfig[s].icon}
+												{statusConfig[s].label}
+											</button>
+										))}
+									</div>
 								</div>
 							</div>
 						);
