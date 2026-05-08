@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import api from "@/api/axios";
+import api from "@/api/axios"; //base URL + auth with token for each request
 
 type Status = "to_read" | "reading" | "finished";
 
@@ -47,6 +47,21 @@ function LibraryPage() {
 		fetchLibrary();
 	}, []);
 
+	const handleStatusChange = async (bookId: number, newStatus: Status) => {
+		try {
+			await api.put(`/library/${bookId}`, { status: newStatus });
+			setUserBooks((prev) =>
+				prev.map((userBook) =>
+					userBook.bookId === bookId
+						? { ...userBook, status: newStatus }
+						: userBook,
+				),
+			);
+		} catch (error) {
+			console.error(error);
+		}
+	};
+
 	if (loading)
 		return <p className="text-center text-gray-400 mt-10">Chargement...</p>;
 
@@ -64,7 +79,7 @@ function LibraryPage() {
 
 			<div className="flex flex-col gap-4">
 				{userBooks
-					.filter((ub) => ub.book !== null)
+					.filter((userBook) => userBook.book !== null)
 					.map((userBook) => {
 						const book = userBook.book!;
 						return (
@@ -97,10 +112,20 @@ function LibraryPage() {
 										</p>
 									)}
 
-									{/* Statut */}
-									<p className="text-xs text-gray-500">
-										{statusLabel[userBook.status]}
-									</p>
+									<select
+										value={userBook.status}
+										onChange={(event) =>
+											handleStatusChange(
+												userBook.bookId,
+												event.target.value as Status,
+											)
+										}
+										className="text-xs text-gray-500 border border-gray-200 rounded-md px-2 py-1 mt-1 bg-white"
+									>
+										<option value="to_read">📚 À lire</option>
+										<option value="reading">📖 En cours</option>
+										<option value="finished">✅ Lu</option>
+									</select>
 								</div>
 							</div>
 						);
