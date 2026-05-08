@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { BookMarked, BookOpen, BookCheck } from "lucide-react";
-import api from "@/api/axios"; //base URL + auth with token for each request
+import api from "@/api/axios"; // base URL + auth with token for each request
 
 type Status = "to_read" | "reading" | "finished";
 
@@ -33,6 +34,7 @@ const statusConfig: Record<Status, { label: string; icon: React.ReactNode }> = {
 function LibraryPage() {
 	const [userBooks, setUserBooks] = useState<UserBook[]>([]);
 	const [loading, setLoading] = useState(true);
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		const fetchLibrary = async () => {
@@ -85,62 +87,71 @@ function LibraryPage() {
 						const book = userBook.book!;
 						return (
 							<div key={userBook.bookId} className="flex gap-3 items-start">
-								{/* Cover */}
-								{book.cover ? (
-									<img
-										src={book.cover}
-										alt={book.title}
-										className="w-14 h-20 object-cover rounded-md shrink-0"
-									/>
-								) : (
-									<div className="w-14 h-20 bg-gray-100 rounded-md shrink-0 flex items-center justify-center text-gray-300 text-xs">
-										No cover
-									</div>
-								)}
-
-								{/* Infos */}
-								<div className="flex flex-col gap-1 flex-1 min-w-0">
-									<p className="font-medium text-sm leading-tight line-clamp-2">
-										{book.title}
-									</p>
-
-									{/* Série */}
-									{book.serie && (
-										<p className="text-xs text-green-600">
-											{book.serie.name}
-											{book.serie.total_volumes &&
-												` • ${book.serie.total_volumes} tomes`}
-										</p>
+								{/* Zone cliquable — cover + titre + série */}
+								<div
+									className="flex gap-3 items-start flex-1 cursor-pointer"
+									onClick={() => navigate(`/book/${userBook.bookId}`)}
+								>
+									{/* Cover */}
+									{book.cover ? (
+										<img
+											src={book.cover}
+											alt={book.title}
+											className="w-14 h-20 object-cover rounded-md shrink-0"
+										/>
+									) : (
+										<div className="w-14 h-20 bg-gray-100 rounded-md shrink-0 flex items-center justify-center text-gray-300 text-xs">
+											No cover
+										</div>
 									)}
 
-									{/* Status */}
-									<div className="flex gap-2 mt-1">
-										{(Object.keys(statusConfig) as Status[]).map((s) => (
-											<button
-												type="button"
-												key={s}
-												onClick={() => handleStatusChange(userBook.bookId, s)}
-												style={{
-													display: "flex",
-													alignItems: "center",
-													gap: "4px",
-													padding: "2px 8px",
-													borderRadius: "999px",
-													fontSize: "11px",
-													border: "1px solid",
-													cursor: "pointer",
-													backgroundColor:
-														userBook.status === s ? "#16a34a" : "transparent",
-													color: userBook.status === s ? "white" : "#9ca3af",
-													borderColor:
-														userBook.status === s ? "#16a34a" : "#e5e7eb",
-												}}
-											>
-												{statusConfig[s].icon}
-												{statusConfig[s].label}
-											</button>
-										))}
+									{/* Titre + Série */}
+									<div className="flex flex-col gap-1 min-w-0">
+										<p className="font-medium text-sm leading-tight line-clamp-2">
+											{book.title}
+										</p>
+										{book.serie && (
+											<p className="text-xs text-green-600">
+												{book.serie.name}
+												{book.serie.total_volumes &&
+													` • ${book.serie.total_volumes} tomes`}
+											</p>
+										)}
 									</div>
+								</div>
+
+								{/* Boutons statut */}
+								<div className="flex flex-col gap-1 mt-1">
+									{(Object.keys(statusConfig) as Status[]).map((statusKey) => (
+										<button
+											type="button"
+											key={statusKey}
+											onClick={() =>
+												handleStatusChange(userBook.bookId, statusKey)
+											}
+											style={{
+												display: "flex",
+												alignItems: "center",
+												gap: "4px",
+												padding: "2px 8px",
+												borderRadius: "999px",
+												fontSize: "11px",
+												border: "1px solid",
+												cursor: "pointer",
+												backgroundColor:
+													userBook.status === statusKey
+														? "#16a34a"
+														: "transparent",
+												color:
+													userBook.status === statusKey ? "white" : "#9ca3af",
+												borderColor:
+													userBook.status === statusKey ? "#16a34a" : "#e5e7eb",
+											}}
+										>
+											{statusConfig[statusKey].icon}
+											{statusConfig[statusKey].label}
+										</button>
+									))}
 								</div>
 							</div>
 						);
