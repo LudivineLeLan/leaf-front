@@ -6,6 +6,7 @@ import ProfilePage from "@/pages/ProfilePage";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import BookDetailPage from "@/pages/BookDetailPage";
+import SeriePage from "@/pages/SeriePage";
 import BottomNav from "@/components/BottomNav";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useLocation } from "react-router-dom";
@@ -34,6 +35,7 @@ function App() {
 				/>
 				<Route path="/stats" element={<StatsPage />} />
 				<Route path="/profile" element={<ProfilePage />} />
+				<Route path="/series/:id" element={<SeriePage />} />
 			</Routes>
 			{showNav && <BottomNav />}
 		</div>
