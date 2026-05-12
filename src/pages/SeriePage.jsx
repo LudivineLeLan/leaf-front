@@ -45,7 +45,9 @@ function SeriePage() {
 
 						<h2>{book.title}</h2>
 
-						<p>Tome {book.seriesPosition}</p>
+						<p>
+							Tome {book.seriesPosition} sur {sortedBooks.length}
+						</p>
 					</div>
 				))}
 			</div>
