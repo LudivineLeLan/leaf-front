@@ -10,7 +10,7 @@ function SeriePage() {
 	useEffect(() => {
 		async function fetchSerie() {
 			try {
-				const response = await fetch(`http://localhost:3000/api/series/${id}`);
+				const response = await fetch(`http://localhost:3000/serie/${id}`);
 
 				const data = await response.json();
 

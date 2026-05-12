@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { BookMarked, BookOpen, BookCheck } from "lucide-react";
 import api from "@/api/axios"; // base URL + auth with token for each request
 
@@ -47,12 +47,14 @@ function LibraryPage() {
 				setLoading(false);
 			}
 		};
+
 		fetchLibrary();
 	}, []);
 
 	const handleStatusChange = async (bookId: number, newStatus: Status) => {
 		try {
 			await api.put(`/library/${bookId}`, { status: newStatus });
+
 			setUserBooks((prev) =>
 				prev.map((userBook) =>
 					userBook.bookId === bookId
@@ -82,17 +84,18 @@ function LibraryPage() {
 
 			<div className="flex flex-col gap-4">
 				{userBooks
-					.filter((userBook) => userBook.book !== null)
+					.filter((ub) => ub.book !== null)
 					.map((userBook) => {
 						const book = userBook.book!;
+
 						return (
 							<div key={userBook.bookId} className="flex gap-3 items-start">
-								{/* Zone cliquable — cover + titre + série */}
+								{/* LIVRE (zone cliquable principale) */}
 								<div
 									className="flex gap-3 items-start flex-1 cursor-pointer"
 									onClick={() => navigate(`/book/${userBook.bookId}`)}
 								>
-									{/* Cover */}
+									{/* COVER */}
 									{book.cover ? (
 										<img
 											src={book.cover}
@@ -105,27 +108,33 @@ function LibraryPage() {
 										</div>
 									)}
 
-									{/* Titre + Série */}
+									{/* TITRE + SERIE */}
 									<div className="flex flex-col gap-1 min-w-0">
 										<p className="font-medium text-sm leading-tight line-clamp-2">
 											{book.title}
 										</p>
-										{book.serie && (
-											<p className="text-xs text-green-600">
+
+										{/* SERIE (CLICABLE SÉPARÉMENT) */}
+										{book.serie?.id && (
+											<Link
+												to={`/series/${book.serie.id}`}
+												className="text-xs text-green-600 hover:underline"
+												onClick={(e) => e.stopPropagation()}
+											>
 												{book.serie.name}
 												{book.serie.total_volumes &&
 													` • ${book.serie.total_volumes} tomes`}
-											</p>
+											</Link>
 										)}
 									</div>
 								</div>
 
-								{/* Boutons statut */}
+								{/* STATUT */}
 								<div className="flex flex-col gap-1 mt-1">
 									{(Object.keys(statusConfig) as Status[]).map((statusKey) => (
 										<button
-											type="button"
 											key={statusKey}
+											type="button"
 											onClick={() =>
 												handleStatusChange(userBook.bookId, statusKey)
 											}

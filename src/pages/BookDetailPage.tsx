@@ -51,6 +51,9 @@ function BookDetailPage() {
 		return <p className="text-center text-gray-400 mt-10">Livre non trouvé</p>;
 
 	const book = userBook.book;
+	console.log(userBook);
+	console.log(userBook?.book);
+	console.log(userBook?.book?.serie);
 
 	return (
 		<div className="pb-4">
