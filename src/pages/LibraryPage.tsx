@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { BookMarked, BookOpen, BookCheck } from "lucide-react";
 import api from "@/api/axios"; // base URL + auth with token for each request
 
@@ -84,7 +84,7 @@ function LibraryPage() {
 
 			<div className="flex flex-col gap-4">
 				{userBooks
-					.filter((ub) => ub.book !== null)
+					.filter((userBook) => userBook.book !== null)
 					.map((userBook) => {
 						const book = userBook.book!;
 
@@ -116,15 +116,17 @@ function LibraryPage() {
 
 										{/* SERIE (CLICABLE SÉPARÉMENT) */}
 										{book.serie?.id && (
-											<Link
-												to={`/series/${book.serie.id}`}
-												className="text-xs text-green-600 hover:underline"
-												onClick={(e) => e.stopPropagation()}
+											<p
+												className="text-xs text-green-600 cursor-pointer hover:underline"
+												onClick={(e) => {
+													e.stopPropagation();
+													navigate(`/serie/${book.serie.id}`);
+												}}
 											>
 												{book.serie.name}
 												{book.serie.total_volumes &&
 													` • ${book.serie.total_volumes} tomes`}
-											</Link>
+											</p>
 										)}
 									</div>
 								</div>
