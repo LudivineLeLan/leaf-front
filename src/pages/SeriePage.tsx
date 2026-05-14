@@ -24,6 +24,7 @@ function SeriePage() {
 	const navigate = useNavigate();
 	const [serie, setSerie] = useState<Serie | null>(null);
 	const [loading, setLoading] = useState(true);
+	const [isFollowing, setIsFollowing] = useState(false);
 
 	useEffect(() => {
 		async function fetchSerie() {
@@ -39,6 +40,35 @@ function SeriePage() {
 		fetchSerie();
 	}, [id]);
 
+	useEffect(() => {
+		async function fetchFollowStatus() {
+			try {
+				const { data } = await api.get("/follows");
+				const following = data.series.some(
+					(s: { serieId: number }) => s.serieId === Number(id),
+				);
+				setIsFollowing(following);
+			} catch (error) {
+				console.error(error);
+			}
+		}
+		fetchFollowStatus();
+	}, [id]);
+
+	const handleFollow = async () => {
+		try {
+			if (isFollowing) {
+				await api.delete(`/follows/serie/${id}`);
+				setIsFollowing(false);
+			} else {
+				await api.post(`/follows/serie/${id}`);
+				setIsFollowing(true);
+			}
+		} catch (error) {
+			console.error(error);
+		}
+	};
+
 	if (loading)
 		return <p className="text-center text-gray-400 mt-10">Chargement...</p>;
 	if (!serie)
@@ -47,11 +77,29 @@ function SeriePage() {
 	return (
 		<div className="pb-4">
 			{/* Header */}
-			<div className="flex items-center gap-3 px-4 pt-6 mb-4">
-				<button type="button" onClick={() => navigate(-1)}>
-					<ArrowLeft size={22} />
+			<div className="flex items-center justify-between px-4 pt-6 mb-4">
+				<div className="flex items-center gap-3">
+					<button type="button" onClick={() => navigate(-1)}>
+						<ArrowLeft size={22} />
+					</button>
+					<h1 className="text-lg font-bold line-clamp-1">{serie.name}</h1>
+				</div>
+				<button
+					type="button"
+					onClick={handleFollow}
+					style={{
+						padding: "6px 14px",
+						borderRadius: "999px",
+						fontSize: "12px",
+						border: "1px solid",
+						cursor: "pointer",
+						backgroundColor: isFollowing ? "transparent" : "#16a34a",
+						color: isFollowing ? "#9ca3af" : "white",
+						borderColor: isFollowing ? "#e5e7eb" : "#16a34a",
+					}}
+				>
+					{isFollowing ? "Suivi ✓" : "+ Suivre"}
 				</button>
-				<h1 className="text-lg font-bold line-clamp-1">{serie.name}</h1>
 			</div>
 
 			{/* Progression */}
@@ -64,7 +112,6 @@ function SeriePage() {
 			<div className="flex flex-col gap-4 px-4">
 				{serie.volumes.map((volume) => (
 					<div key={volume.googleBooksId} className="flex gap-3 items-center">
-						{/* Cover */}
 						{volume.cover ? (
 							<img
 								src={volume.cover}
@@ -76,8 +123,6 @@ function SeriePage() {
 								No cover
 							</div>
 						)}
-
-						{/* Infos */}
 						<div className="flex-1">
 							<p className="font-medium text-sm">{volume.title}</p>
 							{volume.seriesPosition && (
