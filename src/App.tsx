@@ -8,6 +8,7 @@ import RegisterPage from "@/pages/RegisterPage";
 import BookDetailPage from "@/pages/BookDetailPage";
 import SeriePage from "./pages/SeriePage";
 import BottomNav from "@/components/BottomNav";
+import NotificationsPage from "./pages/NotificationsPage";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useLocation } from "react-router-dom";
 
@@ -40,6 +41,14 @@ function App() {
 					element={
 						<ProtectedRoute>
 							<SeriePage />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/notifications"
+					element={
+						<ProtectedRoute>
+							<NotificationsPage />
 						</ProtectedRoute>
 					}
 				/>
