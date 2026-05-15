@@ -1,7 +1,13 @@
-import { useState, useEffect } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import api from "@/api/axios";
+
+interface Author {
+	id: number;
+	name: string;
+	firstname: string | null;
+}
 
 interface Serie {
 	id: number;
@@ -17,6 +23,7 @@ interface Book {
 	releaseDate: string | null;
 	seriesPosition: number | null;
 	serie: Serie | null;
+	authors: Author[];
 }
 
 interface UserBook {
@@ -30,6 +37,7 @@ function BookDetailPage() {
 	const navigate = useNavigate();
 	const [userBook, setUserBook] = useState<UserBook | null>(null);
 	const [loading, setLoading] = useState(true);
+	const [followedAuthors, setFollowedAuthors] = useState<number[]>([]);
 
 	useEffect(() => {
 		const fetchBook = async () => {
@@ -45,19 +53,44 @@ function BookDetailPage() {
 		fetchBook();
 	}, [bookId]);
 
+	useEffect(() => {
+		const fetchFollows = async () => {
+			try {
+				const { data } = await api.get("/follows");
+				setFollowedAuthors(
+					data.authors.map((a: { authorId: number }) => a.authorId),
+				);
+			} catch (error) {
+				console.error(error);
+			}
+		};
+		fetchFollows();
+	}, []);
+
+	const handleFollowAuthor = async (authorId: number) => {
+		try {
+			if (followedAuthors.includes(authorId)) {
+				await api.delete(`/follows/author/${authorId}`);
+				setFollowedAuthors((prev) => prev.filter((id) => id !== authorId));
+			} else {
+				await api.post(`/follows/author/${authorId}`);
+				setFollowedAuthors((prev) => [...prev, authorId]);
+			}
+		} catch (error) {
+			console.error(error);
+		}
+	};
+
 	if (loading)
 		return <p className="text-center text-gray-400 mt-10">Chargement...</p>;
 	if (!userBook)
 		return <p className="text-center text-gray-400 mt-10">Livre non trouvé</p>;
 
 	const book = userBook.book;
-	console.log(userBook);
-	console.log(userBook?.book);
-	console.log(userBook?.book?.serie);
 
 	return (
 		<div className="pb-4">
-			{/* Header avec bouton retour */}
+			{/* Header */}
 			<div className="flex items-center gap-3 px-4 pt-6 mb-6">
 				<button type="button" onClick={() => navigate(-1)}>
 					<ArrowLeft size={22} />
@@ -80,18 +113,55 @@ function BookDetailPage() {
 				)}
 			</div>
 
-			{/* Infos */}
-			<div className="px-4 flex flex-col gap-3">
+			<div className="px-4 flex flex-col gap-4">
 				{/* Série */}
-				{book.serie?.id && (
-					<Link
-						to={`/series/${book.serie.id}`}
-						className="text-sm text-green-600 font-medium hover:underline"
+				{book.serie && (
+					<p
+						className="text-sm text-green-600 font-medium cursor-pointer hover:underline"
+						onClick={() => navigate(`/serie/${book.serie!.id}`)}
 					>
 						{book.serie.name}
 						{book.seriesPosition && ` • Tome ${book.seriesPosition}`}
 						{book.serie.total_volumes && ` / ${book.serie.total_volumes}`}
-					</Link>
+					</p>
+				)}
+
+				{/* Auteurs */}
+				{book.authors?.length > 0 && (
+					<div className="flex flex-col gap-2">
+						{book.authors.map((author) => (
+							<div
+								key={author.id}
+								className="flex items-center justify-between"
+							>
+								<p className="text-sm text-gray-700">
+									{author.firstname} {author.name}
+								</p>
+								<button
+									type="button"
+									onClick={() => handleFollowAuthor(author.id)}
+									style={{
+										padding: "4px 12px",
+										borderRadius: "999px",
+										fontSize: "11px",
+										border: "1px solid",
+										cursor: "pointer",
+										backgroundColor: followedAuthors.includes(author.id)
+											? "transparent"
+											: "#16a34a",
+										color: followedAuthors.includes(author.id)
+											? "#9ca3af"
+											: "white",
+										borderColor: followedAuthors.includes(author.id)
+											? "#e5e7eb"
+											: "#16a34a",
+									}}
+								>
+									{followedAuthors.includes(author.id) ? "Suivi ✓" : "+ Suivre"}
+								</button>
+							</div>
+						))}
+					</div>
 				)}
 
 				{/* Date de publication */}
