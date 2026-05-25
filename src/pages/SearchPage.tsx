@@ -20,7 +20,7 @@ function SearchPage() {
 	const [loading, setLoading] = useState(false);
 	const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-	// Attendre 500ms après la dernière frappe
+	// Wait 500ms after last letter
 	useEffect(() => {
 		const timer = setTimeout(() => {
 			setDebouncedQuery(query);
@@ -29,7 +29,7 @@ function SearchPage() {
 		return () => clearTimeout(timer);
 	}, [query]);
 
-	// Lancer la recherche uniquement sur debouncedQuery
+	// Search only on debouncedQuery
 	useEffect(() => {
 		if (debouncedQuery.trim().length < 2) {
 			setResults([]);
@@ -67,7 +67,7 @@ function SearchPage() {
 
 	const handleAddBook = async (book: Book) => {
 		try {
-			// 1. Importer le livre en base
+			// 1. Import book in db
 			const { data: importedBook } = await api.post("/books/import", {
 				googleBooksId: book.googleBooksId,
 				title: book.title,
@@ -75,8 +75,17 @@ function SearchPage() {
 				thumbnail: book.thumbnail,
 			});
 
-			// 2. Ajouter à la bibliothèque
+			// 2. Add book to library
 			await api.post(`/library/${importedBook.id}`, { status: "to_read" });
+
+			// Update isInLibrary in results
+			setResults((prev) =>
+				prev.map((result) =>
+					result.googleBooksId === book.googleBooksId
+						? { ...result, isInLibrary: true }
+						: result,
+				),
+			);
 
 			setSuccessMessage(`"${book.title}" ajouté à ta bibliothèque !`);
 			setTimeout(() => setSuccessMessage(null), 3000);
@@ -140,7 +149,13 @@ function SearchPage() {
 								{book.authors?.join(", ")}
 							</p>
 							<div>
-								<AddButton onClick={() => handleAddBook(book)} />
+								{book.isInLibrary ? (
+									<p className="text-xs text-green-600">
+										✓ Dans ta bibliothèque
+									</p>
+								) : (
+									<AddButton onClick={() => handleAddBook(book)} />
+								)}
 							</div>
 						</div>
 					</div>
