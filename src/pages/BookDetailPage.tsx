@@ -167,9 +167,10 @@ function BookDetailPage() {
 
 				{/* Synopsis */}
 				{book.synopsis ? (
-					<p className="text-sm text-gray-600 leading-relaxed">
-						{book.synopsis}
-					</p>
+					<div
+						className="text-sm text-gray-600 leading-relaxed"
+						dangerouslySetInnerHTML={{ __html: book.synopsis }} //allows React to inject HTML, dangerous if coming from user
+					/>
 				) : (
 					<p className="text-sm text-gray-400 italic">
 						Aucun synopsis disponible
