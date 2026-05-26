@@ -15,7 +15,7 @@ interface Serie {
 	total_volumes: number | null;
 }
 
-interface Book {
+interface BookDetail {
 	id: number;
 	title: string;
 	cover: string | null;
@@ -24,26 +24,22 @@ interface Book {
 	seriesPosition: number | null;
 	serie: Serie | null;
 	authors: Author[];
-}
-
-interface UserBook {
-	bookId: number;
-	status: string;
-	book: Book;
+	isInLibrary: boolean;
+	userStatus: string | null;
 }
 
 function BookDetailPage() {
 	const { bookId } = useParams<{ bookId: string }>();
 	const navigate = useNavigate();
-	const [userBook, setUserBook] = useState<UserBook | null>(null);
+	const [book, setBook] = useState<BookDetail | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [followedAuthors, setFollowedAuthors] = useState<number[]>([]);
 
 	useEffect(() => {
 		const fetchBook = async () => {
 			try {
-				const { data } = await api.get(`/library/${bookId}`);
-				setUserBook(data);
+				const { data } = await api.get(`/books/id/${bookId}`);
+				setBook(data);
 			} catch (error) {
 				console.error(error);
 			} finally {
@@ -83,10 +79,8 @@ function BookDetailPage() {
 
 	if (loading)
 		return <p className="text-center text-gray-400 mt-10">Chargement...</p>;
-	if (!userBook)
+	if (!book)
 		return <p className="text-center text-gray-400 mt-10">Livre non trouvé</p>;
-
-	const book = userBook.book;
 
 	return (
 		<div className="pb-4">

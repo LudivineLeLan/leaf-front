@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
 import api from "@/api/axios";
 import AddButton from "@/components/AddButton";
@@ -19,6 +20,7 @@ function SearchPage() {
 	const [results, setResults] = useState<Book[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [successMessage, setSuccessMessage] = useState<string | null>(null);
+	const navigate = useNavigate();
 
 	// Wait 500ms after last letter
 	useEffect(() => {
@@ -94,6 +96,20 @@ function SearchPage() {
 		}
 	};
 
+	const handleOpenBook = async (book: Book) => {
+		try {
+			const { data: importedBook } = await api.post("/books/import", {
+				googleBooksId: book.googleBooksId,
+				title: book.title,
+				authors: book.authors,
+				thumbnail: book.thumbnail,
+			});
+			navigate(`/book/${importedBook.id}`);
+		} catch (err) {
+			console.error(err);
+		}
+	};
+
 	return (
 		<div className="px-4 pt-6 pb-4">
 			<h1 className="text-2xl font-bold mb-4">Recherche</h1>
@@ -129,34 +145,40 @@ function SearchPage() {
 			<div className="flex flex-col gap-4">
 				{results.map((book) => (
 					<div key={book.googleBooksId} className="flex gap-3 items-start">
-						{book.thumbnail ? (
-							<img
-								src={book.thumbnail}
-								alt={book.title}
-								className="w-14 h-20 object-cover rounded-md shrink-0"
-							/>
-						) : (
-							<div className="w-14 h-20 bg-gray-100 rounded-md shrink-0 flex items-center justify-center text-gray-300 text-xs">
-								No cover
-							</div>
-						)}
+						{/* Zone cliquable */}
+						<div
+							className="flex gap-3 items-start flex-1 cursor-pointer"
+							onClick={() => handleOpenBook(book)}
+						>
+							{book.thumbnail ? (
+								<img
+									src={book.thumbnail}
+									alt={book.title}
+									className="w-14 h-20 object-cover rounded-md shrink-0"
+								/>
+							) : (
+								<div className="w-14 h-20 bg-gray-100 rounded-md shrink-0 flex items-center justify-center text-gray-300 text-xs">
+									No cover
+								</div>
+							)}
 
-						<div className="flex flex-col gap-1 flex-1 min-w-0">
-							<p className="font-medium text-sm leading-tight line-clamp-2">
-								{book.title}
-							</p>
-							<p className="text-xs text-gray-500">
-								{book.authors?.join(", ")}
-							</p>
-							<div>
-								{book.isInLibrary ? (
-									<p className="text-xs text-green-600">
-										✓ Dans ta bibliothèque
-									</p>
-								) : (
-									<AddButton onClick={() => handleAddBook(book)} />
-								)}
+							<div className="flex flex-col gap-1 min-w-0">
+								<p className="font-medium text-sm leading-tight line-clamp-2">
+									{book.title}
+								</p>
+								<p className="text-xs text-gray-500">
+									{book.authors?.join(", ")}
+								</p>
 							</div>
+						</div>
+
+						{/* Bouton Ajouter en dehors de la zone cliquable */}
+						<div>
+							{book.isInLibrary ? (
+								<p className="text-xs text-green-600">✓ Dans ta bibliothèque</p>
+							) : (
+								<AddButton onClick={() => handleAddBook(book)} />
+							)}
 						</div>
 					</div>
 				))}
