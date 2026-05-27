@@ -19,7 +19,7 @@ function App() {
 	const showNav = !noNavPages.includes(location.pathname);
 
 	return (
-		<div className="min-h-screen pb-16">
+		<div className="min-h-screen pb-24">
 			<Routes>
 				<Route path="/" element={<Navigate to="/login" />} />
 				<Route path="/login" element={<LoginPage />} />
@@ -53,7 +53,13 @@ function App() {
 					}
 				/>
 			</Routes>
-			{showNav && <BottomNav />}
+			{showNav && (
+				<>
+					<div className="h-20" />{" "}
+					{/* Spacer to avoid content superposition on navbar */}
+					<BottomNav />
+				</>
+			)}
 		</div>
 	);
 }

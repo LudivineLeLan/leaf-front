@@ -111,17 +111,18 @@ function SearchPage() {
 	};
 
 	return (
-		<div className="px-4 pt-6 pb-4">
-			<h1 className="text-2xl font-bold mb-4">Recherche</h1>
+		<div className="px-4 pt-6 pb-24 bg-background min-h-screen">
+			<h1 className="text-2xl font-bold mb-4 text-primary">Recherche</h1>
+
 			{successMessage && (
-				<div className="mb-4 p-3 bg-green-50 text-green-700 text-sm rounded-lg">
+				<div className="mb-4 p-3 bg-accent-light text-accent text-sm rounded-lg">
 					{successMessage}
 				</div>
 			)}
 
 			<div className="relative mb-6 flex items-center">
 				<Search
-					className="absolute left-3 text-gray-400 pointer-events-none"
+					className="absolute left-3 text-muted pointer-events-none"
 					size={18}
 				/>
 				<input
@@ -130,22 +131,21 @@ function SearchPage() {
 					onChange={(event) => handleSearch(event.target.value)}
 					placeholder="Titre, auteur..."
 					style={{ paddingLeft: "2.5rem" }}
-					className="w-full border border-gray-300 rounded-xl pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+					className="w-full bg-surface border border-border rounded-xl pr-4 py-2.5 text-sm text-primary placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent"
 				/>
 			</div>
 
 			{loading && (
-				<p className="text-center text-gray-400 text-sm">Recherche...</p>
+				<p className="text-center text-muted text-sm">Recherche...</p>
 			)}
 
 			{!loading && results.length === 0 && query.length >= 2 && (
-				<p className="text-center text-gray-400 text-sm">Aucun résultat</p>
+				<p className="text-center text-muted text-sm">Aucun résultat</p>
 			)}
 
 			<div className="flex flex-col gap-4">
 				{results.map((book) => (
 					<div key={book.googleBooksId} className="flex gap-3 items-start">
-						{/* Zone cliquable */}
 						<div
 							className="flex gap-3 items-start flex-1 cursor-pointer"
 							onClick={() => handleOpenBook(book)}
@@ -157,25 +157,24 @@ function SearchPage() {
 									className="w-14 h-20 object-cover rounded-md shrink-0"
 								/>
 							) : (
-								<div className="w-14 h-20 bg-gray-100 rounded-md shrink-0 flex items-center justify-center text-gray-300 text-xs">
+								<div className="w-14 h-20 bg-surface-elevated rounded-md shrink-0 flex items-center justify-center text-muted text-xs">
 									No cover
 								</div>
 							)}
 
 							<div className="flex flex-col gap-1 min-w-0">
-								<p className="font-medium text-sm leading-tight line-clamp-2">
+								<p className="font-medium text-sm leading-tight line-clamp-2 text-primary">
 									{book.title}
 								</p>
-								<p className="text-xs text-gray-500">
+								<p className="text-xs text-secondary">
 									{book.authors?.join(", ")}
 								</p>
 							</div>
 						</div>
 
-						{/* Bouton Ajouter en dehors de la zone cliquable */}
 						<div>
 							{book.isInLibrary ? (
-								<p className="text-xs text-green-600">✓ Dans ta bibliothèque</p>
+								<p className="text-xs text-accent">✓ Dans ta bibliothèque</p>
 							) : (
 								<AddButton onClick={() => handleAddBook(book)} />
 							)}
