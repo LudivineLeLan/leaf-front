@@ -83,13 +83,19 @@ function BookDetailPage() {
 		return <p className="text-center text-gray-400 mt-10">Livre non trouvé</p>;
 
 	return (
-		<div className="pb-4">
+		<div className="pb-24 bg-background min-h-screen">
 			{/* Header */}
 			<div className="flex items-center gap-3 px-4 pt-6 mb-6">
-				<button type="button" onClick={() => navigate(-1)}>
+				<button
+					type="button"
+					onClick={() => navigate(-1)}
+					className="text-primary"
+				>
 					<ArrowLeft size={22} />
 				</button>
-				<h1 className="text-lg font-bold line-clamp-1">{book.title}</h1>
+				<h1 className="text-lg font-bold line-clamp-1 text-primary">
+					{book.title}
+				</h1>
 			</div>
 
 			{/* Cover */}
@@ -98,20 +104,20 @@ function BookDetailPage() {
 					<img
 						src={book.cover}
 						alt={book.title}
-						className="w-32 h-48 object-cover rounded-lg shadow-md"
+						className="w-36 h-52 object-cover rounded-xl shadow-lg shadow-black/50"
 					/>
 				) : (
-					<div className="w-32 h-48 bg-gray-100 rounded-lg flex items-center justify-center text-gray-300 text-sm">
+					<div className="w-36 h-52 bg-surface rounded-xl flex items-center justify-center text-muted text-sm">
 						No cover
 					</div>
 				)}
 			</div>
 
-			<div className="px-4 flex flex-col gap-4">
-				{/* Série */}
+			<div className="px-4 flex flex-col gap-5">
+				{/* Serie */}
 				{book.serie && (
 					<p
-						className="text-sm text-green-600 font-medium cursor-pointer hover:underline"
+						className="text-sm text-accent font-medium cursor-pointer hover:underline"
 						onClick={() => navigate(`/serie/${book.serie!.id}`)}
 					>
 						{book.serie.name}
@@ -120,15 +126,15 @@ function BookDetailPage() {
 					</p>
 				)}
 
-				{/* Auteurs */}
+				{/* Authors */}
 				{book.authors?.length > 0 && (
-					<div className="flex flex-col gap-2">
+					<div className="flex flex-col gap-3">
 						{book.authors.map((author) => (
 							<div
 								key={author.id}
 								className="flex items-center justify-between"
 							>
-								<p className="text-sm text-gray-700">
+								<p className="text-sm text-secondary">
 									{author.firstname} {author.name}
 								</p>
 								<button
@@ -142,13 +148,13 @@ function BookDetailPage() {
 										cursor: "pointer",
 										backgroundColor: followedAuthors.includes(author.id)
 											? "transparent"
-											: "#16a34a",
+											: "#34d399",
 										color: followedAuthors.includes(author.id)
-											? "#9ca3af"
-											: "white",
+											? "#52525b"
+											: "#0f0f0f",
 										borderColor: followedAuthors.includes(author.id)
-											? "#e5e7eb"
-											: "#16a34a",
+											? "#3f3f46"
+											: "#34d399",
 									}}
 								>
 									{followedAuthors.includes(author.id) ? "Suivi ✓" : "+ Suivre"}
@@ -158,9 +164,12 @@ function BookDetailPage() {
 					</div>
 				)}
 
-				{/* Date de publication */}
+				{/* Divider */}
+				<div className="border-t border-border" />
+
+				{/* Release date */}
 				{book.releaseDate && (
-					<p className="text-xs text-gray-400">
+					<p className="text-xs text-muted">
 						Publié le {new Date(book.releaseDate).toLocaleDateString("fr-FR")}
 					</p>
 				)}
@@ -168,13 +177,11 @@ function BookDetailPage() {
 				{/* Synopsis */}
 				{book.synopsis ? (
 					<div
-						className="text-sm text-gray-600 leading-relaxed"
-						dangerouslySetInnerHTML={{ __html: book.synopsis }} //allows React to inject HTML, dangerous if coming from user
+						className="text-sm text-secondary leading-relaxed"
+						dangerouslySetInnerHTML={{ __html: book.synopsis }}
 					/>
 				) : (
-					<p className="text-sm text-gray-400 italic">
-						Aucun synopsis disponible
-					</p>
+					<p className="text-sm text-muted italic">Aucun synopsis disponible</p>
 				)}
 			</div>
 		</div>

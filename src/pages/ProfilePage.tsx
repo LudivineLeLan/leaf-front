@@ -12,21 +12,21 @@ function ProfilePage() {
 	};
 
 	return (
-		<div className="px-4 pt-6 pb-4">
-			<h1 className="text-2xl font-bold mb-6">Profil</h1>
+		<div className="px-4 pt-6 pb-24 bg-background min-h-screen">
+			<h1 className="text-2xl font-bold mb-6 text-primary">Profil</h1>
 
 			{/* Avatar + infos */}
-			<div className="flex items-center gap-4 mb-8">
-				<div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
-					<User size={32} className="text-green-600" />
+			<div className="flex items-center gap-4 mb-8 bg-surface rounded-xl p-4">
+				<div className="w-16 h-16 rounded-full bg-surface-elevated flex items-center justify-center">
+					<User size={32} className="text-accent" />
 				</div>
 				<div>
-					<p className="font-semibold text-lg">{user?.username}</p>
-					<p className="text-sm text-gray-400">{user?.email}</p>
+					<p className="font-semibold text-lg text-primary">{user?.username}</p>
+					<p className="text-sm text-muted">{user?.email}</p>
 				</div>
 			</div>
 
-			{/* Log out button */}
+			{/* Logout button */}
 			<button
 				type="button"
 				onClick={handleLogout}
@@ -34,13 +34,13 @@ function ProfilePage() {
 					display: "flex",
 					alignItems: "center",
 					gap: "8px",
-					padding: "10px 16px",
+					padding: "12px 16px",
 					borderRadius: "12px",
 					fontSize: "14px",
-					border: "1px solid #fee2e2",
+					border: "1px solid #3f1010",
 					cursor: "pointer",
-					backgroundColor: "#fff1f2",
-					color: "#dc2626",
+					backgroundColor: "#1c0a0a",
+					color: "#f87171",
 					width: "100%",
 				}}
 			>

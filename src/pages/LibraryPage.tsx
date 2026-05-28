@@ -79,23 +79,25 @@ function LibraryPage() {
 		);
 
 	return (
-		<div className="px-4 pt-6 pb-4">
-			<h1 className="text-2xl font-bold mb-4">Ma bibliothèque</h1>
+		<div className="px-4 pt-6 pb-24 bg-background min-h-screen">
+			<h1 className="text-2xl font-bold mb-4 text-primary">Ma bibliothèque</h1>
 
 			<div className="flex flex-col gap-4">
 				{userBooks
 					.filter((userBook) => userBook.book !== null)
 					.map((userBook) => {
 						const book = userBook.book!;
-
 						return (
-							<div key={userBook.bookId} className="flex gap-3 items-start">
-								{/* LIVRE (zone cliquable principale) */}
+							<div
+								key={userBook.bookId}
+								className="flex gap-3 items-start bg-surface rounded-xl p-3"
+							>
+								{/* Clickable zone */}
 								<div
 									className="flex gap-3 items-start flex-1 cursor-pointer"
 									onClick={() => navigate(`/book/${userBook.bookId}`)}
 								>
-									{/* COVER */}
+									{/* Cover */}
 									{book.cover ? (
 										<img
 											src={book.cover}
@@ -103,24 +105,22 @@ function LibraryPage() {
 											className="w-14 h-20 object-cover rounded-md shrink-0"
 										/>
 									) : (
-										<div className="w-14 h-20 bg-gray-100 rounded-md shrink-0 flex items-center justify-center text-gray-300 text-xs">
+										<div className="w-14 h-20 bg-surface-elevated rounded-md shrink-0 flex items-center justify-center text-muted text-xs">
 											No cover
 										</div>
 									)}
 
-									{/* TITRE + SERIE */}
+									{/* Title + Serie */}
 									<div className="flex flex-col gap-1 min-w-0">
-										<p className="font-medium text-sm leading-tight line-clamp-2">
+										<p className="font-medium text-sm leading-tight line-clamp-2 text-primary">
 											{book.title}
 										</p>
-
-										{/* SERIE (CLICABLE SÉPARÉMENT) */}
 										{book.serie?.id && (
 											<p
-												className="text-xs text-green-600 cursor-pointer hover:underline"
+												className="text-xs text-accent cursor-pointer hover:underline"
 												onClick={(e) => {
 													e.stopPropagation();
-													navigate(`/serie/${book.serie.id}`);
+													navigate(`/serie/${book.serie!.id}`);
 												}}
 											>
 												{book.serie.name}
@@ -131,7 +131,7 @@ function LibraryPage() {
 									</div>
 								</div>
 
-								{/* STATUT */}
+								{/* Status buttons */}
 								<div className="flex flex-col gap-1 mt-1">
 									{(Object.keys(statusConfig) as Status[]).map((statusKey) => (
 										<button
@@ -151,12 +151,12 @@ function LibraryPage() {
 												cursor: "pointer",
 												backgroundColor:
 													userBook.status === statusKey
-														? "#16a34a"
+														? "#34d399"
 														: "transparent",
 												color:
-													userBook.status === statusKey ? "white" : "#9ca3af",
+													userBook.status === statusKey ? "#0f0f0f" : "#52525b",
 												borderColor:
-													userBook.status === statusKey ? "#16a34a" : "#e5e7eb",
+													userBook.status === statusKey ? "#34d399" : "#3f3f46",
 											}}
 										>
 											{statusConfig[statusKey].icon}

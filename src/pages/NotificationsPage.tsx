@@ -33,24 +33,24 @@ function NotificationsPage() {
 		return <p className="text-center text-gray-400 mt-10">Chargement...</p>;
 
 	return (
-		<div className="px-4 pt-6 pb-4">
-			<h1 className="text-2xl font-bold mb-4">Alertes</h1>
+		<div className="px-4 pt-6 pb-24 bg-background min-h-screen">
+			<h1 className="text-2xl font-bold mb-4 text-primary">Alertes</h1>
 
 			{notifications.length === 0 ? (
-				<p className="text-center text-gray-400 mt-10">Aucune notification</p>
+				<p className="text-center text-muted mt-10">Aucune notification</p>
 			) : (
 				<div className="flex flex-col gap-3">
 					{notifications.map((notification) => (
 						<div
 							key={notification.id}
-							className={`p-3 rounded-lg text-sm ${
+							className={`p-3 rounded-xl text-sm border ${
 								notification.isRead
-									? "bg-gray-50 text-gray-400"
-									: "bg-green-50 text-gray-700"
+									? "bg-surface border-border text-muted"
+									: "bg-surface border-accent text-primary"
 							}`}
 						>
 							<p>{notification.message}</p>
-							<p className="text-xs text-gray-400 mt-1">
+							<p className="text-xs text-muted mt-1">
 								{new Date(notification.created_at).toLocaleDateString("fr-FR")}
 							</p>
 						</div>

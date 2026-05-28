@@ -75,14 +75,20 @@ function SeriePage() {
 		return <p className="text-center text-gray-400 mt-10">Série introuvable</p>;
 
 	return (
-		<div className="pb-4">
+		<div className="pb-24 bg-background min-h-screen">
 			{/* Header */}
 			<div className="flex items-center justify-between px-4 pt-6 mb-4">
 				<div className="flex items-center gap-3">
-					<button type="button" onClick={() => navigate(-1)}>
+					<button
+						type="button"
+						onClick={() => navigate(-1)}
+						className="text-primary"
+					>
 						<ArrowLeft size={22} />
 					</button>
-					<h1 className="text-lg font-bold line-clamp-1">{serie.name}</h1>
+					<h1 className="text-lg font-bold line-clamp-1 text-primary">
+						{serie.name}
+					</h1>
 				</div>
 				<button
 					type="button"
@@ -93,9 +99,9 @@ function SeriePage() {
 						fontSize: "12px",
 						border: "1px solid",
 						cursor: "pointer",
-						backgroundColor: isFollowing ? "transparent" : "#16a34a",
-						color: isFollowing ? "#9ca3af" : "white",
-						borderColor: isFollowing ? "#e5e7eb" : "#16a34a",
+						backgroundColor: isFollowing ? "transparent" : "#34d399",
+						color: isFollowing ? "#52525b" : "#0f0f0f",
+						borderColor: isFollowing ? "#3f3f46" : "#34d399",
 					}}
 				>
 					{isFollowing ? "Suivi ✓" : "+ Suivre"}
@@ -103,35 +109,41 @@ function SeriePage() {
 			</div>
 
 			{/* Progression */}
-			<p className="px-4 text-sm text-gray-400 mb-4">
+			<p className="px-4 text-sm text-muted mb-4">
 				{serie.volumes.filter((v) => v.isInLibrary).length} /{" "}
 				{serie.volumes.length} tomes
 			</p>
 
-			{/* Liste des volumes */}
-			<div className="flex flex-col gap-4 px-4">
+			{/* Volumes list */}
+			<div className="flex flex-col gap-3 px-4">
 				{serie.volumes.map((volume) => (
-					<div key={volume.googleBooksId} className="flex gap-3 items-center">
+					<div
+						key={volume.googleBooksId}
+						className="flex gap-3 items-center bg-surface rounded-xl p-3"
+					>
+						{/* Cover */}
 						{volume.cover ? (
 							<img
 								src={volume.cover}
 								alt={volume.title}
-								className="w-14 h-20 object-cover rounded-md shrink-0"
+								className="w-12 h-18 object-cover rounded-md shrink-0"
 							/>
 						) : (
-							<div className="w-14 h-20 bg-gray-100 rounded-md shrink-0 flex items-center justify-center text-gray-300 text-xs">
+							<div className="w-12 h-18 bg-surface-elevated rounded-md shrink-0 flex items-center justify-center text-muted text-xs">
 								No cover
 							</div>
 						)}
+
+						{/* Infos */}
 						<div className="flex-1">
-							<p className="font-medium text-sm">{volume.title}</p>
+							<p className="font-medium text-sm text-primary">{volume.title}</p>
 							{volume.seriesPosition && (
-								<p className="text-xs text-gray-400">
+								<p className="text-xs text-muted">
 									Tome {volume.seriesPosition}
 								</p>
 							)}
 							<p
-								className={`text-xs mt-1 ${volume.isInLibrary ? "text-green-600" : "text-gray-300"}`}
+								className={`text-xs mt-1 ${volume.isInLibrary ? "text-accent" : "text-muted"}`}
 							>
 								{volume.isInLibrary ? "✓ Dans ta bibliothèque" : "Non possédé"}
 							</p>

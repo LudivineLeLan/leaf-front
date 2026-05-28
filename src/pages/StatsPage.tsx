@@ -36,23 +36,23 @@ function StatsPage() {
 		);
 
 	const statCards = [
-		{ label: "Livres au total", value: stats.total, color: "#16a34a" },
-		{ label: "À lire", value: stats.toRead, color: "#9ca3af" },
-		{ label: "En cours", value: stats.reading, color: "#f59e0b" },
-		{ label: "Lus", value: stats.finished, color: "#16a34a" },
-		{ label: "Séries suivies", value: stats.seriesFollowed, color: "#6366f1" },
-		{ label: "Auteurs suivis", value: stats.authorsFollowed, color: "#ec4899" },
+		{ label: "Livres au total", value: stats.total, color: "#34d399" },
+		{ label: "À lire", value: stats.toRead, color: "#818cf8" },
+		{ label: "En cours", value: stats.reading, color: "#fbbf24" },
+		{ label: "Lus", value: stats.finished, color: "#34d399" },
+		{ label: "Séries suivies", value: stats.seriesFollowed, color: "#c084fc" },
+		{ label: "Auteurs suivis", value: stats.authorsFollowed, color: "#f472b6" },
 	];
 
 	return (
-		<div className="px-4 pt-6 pb-4">
-			<h1 className="text-2xl font-bold mb-6">Statistiques</h1>
+		<div className="px-4 pt-6 pb-24 bg-background min-h-screen">
+			<h1 className="text-2xl font-bold mb-6 text-primary">Statistiques</h1>
 
 			<div className="grid grid-cols-2 gap-4">
 				{statCards.map((card) => (
 					<div
 						key={card.label}
-						className="bg-white rounded-xl p-4 shadow-sm border border-gray-100"
+						className="bg-surface rounded-xl p-4 border border-border"
 					>
 						<p
 							className="text-3xl font-bold mb-1"
@@ -60,7 +60,7 @@ function StatsPage() {
 						>
 							{card.value}
 						</p>
-						<p className="text-xs text-gray-500">{card.label}</p>
+						<p className="text-xs text-secondary">{card.label}</p>
 					</div>
 				))}
 			</div>
