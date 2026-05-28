@@ -46,7 +46,12 @@ function StatsPage() {
 
 	return (
 		<div className="px-4 pt-6 pb-24 bg-background min-h-screen">
-			<h1 className="text-2xl font-bold mb-6 text-primary">Statistiques</h1>
+			<h1
+				className="text-2xl font-bold text-primary"
+				style={{ marginBottom: "1rem" }}
+			>
+				Statistiques
+			</h1>
 
 			<div className="grid grid-cols-2 gap-4">
 				{statCards.map((card) => (

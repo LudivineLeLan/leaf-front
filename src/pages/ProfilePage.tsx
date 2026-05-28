@@ -13,7 +13,12 @@ function ProfilePage() {
 
 	return (
 		<div className="px-4 pt-6 pb-24 bg-background min-h-screen">
-			<h1 className="text-2xl font-bold mb-6 text-primary">Profil</h1>
+			<h1
+				className="text-2xl font-bold text-primary"
+				style={{ marginBottom: "1rem" }}
+			>
+				Profil
+			</h1>
 
 			{/* Avatar + infos */}
 			<div className="flex items-center gap-4 mb-8 bg-surface rounded-xl p-4">

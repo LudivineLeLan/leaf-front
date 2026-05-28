@@ -80,7 +80,12 @@ function LibraryPage() {
 
 	return (
 		<div className="px-4 pt-6 pb-24 bg-background min-h-screen">
-			<h1 className="text-2xl font-bold mb-4 text-primary">Ma bibliothèque</h1>
+			<h1
+				className="text-2xl font-bold text-primary"
+				style={{ marginBottom: "1rem" }}
+			>
+				Bibliothèque
+			</h1>
 
 			<div className="flex flex-col gap-4">
 				{userBooks

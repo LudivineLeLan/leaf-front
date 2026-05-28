@@ -34,7 +34,12 @@ function NotificationsPage() {
 
 	return (
 		<div className="px-4 pt-6 pb-24 bg-background min-h-screen">
-			<h1 className="text-2xl font-bold mb-4 text-primary">Alertes</h1>
+			<h1
+				className="text-2xl font-bold text-primary"
+				style={{ marginBottom: "1rem" }}
+			>
+				Notifications
+			</h1>
 
 			{notifications.length === 0 ? (
 				<p className="text-center text-muted mt-10">Aucune notification</p>

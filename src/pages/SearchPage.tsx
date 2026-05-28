@@ -112,7 +112,12 @@ function SearchPage() {
 
 	return (
 		<div className="px-4 pt-6 pb-24 bg-background min-h-screen">
-			<h1 className="text-2xl font-bold mb-4 text-primary">Recherche</h1>
+			<h1
+				className="text-2xl font-bold text-primary"
+				style={{ marginBottom: "1rem" }}
+			>
+				Recherche
+			</h1>
 
 			{successMessage && (
 				<div className="mb-4 p-3 bg-accent-light text-accent text-sm rounded-lg">
