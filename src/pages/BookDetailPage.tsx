@@ -77,6 +77,15 @@ function BookDetailPage() {
 		}
 	};
 
+	const handleRemoveFromLibrary = async () => {
+		try {
+			await api.delete(`/library/${bookId}`);
+			navigate("/library");
+		} catch (error) {
+			console.error(error);
+		}
+	};
+
 	if (loading)
 		return <p className="text-center text-gray-400 mt-10">Chargement...</p>;
 	if (!book)
@@ -182,6 +191,29 @@ function BookDetailPage() {
 					/>
 				) : (
 					<p className="text-sm text-muted italic">Aucun synopsis disponible</p>
+				)}
+				{/* Remove from library */}
+				{book.isInLibrary && (
+					<button
+						type="button"
+						onClick={handleRemoveFromLibrary}
+						style={{
+							display: "flex",
+							alignItems: "center",
+							justifyContent: "center",
+							gap: "8px",
+							padding: "12px 16px",
+							borderRadius: "12px",
+							fontSize: "14px",
+							border: "1px solid #3f1010",
+							cursor: "pointer",
+							backgroundColor: "#1c0a0a",
+							color: "#f87171",
+							width: "100%",
+						}}
+					>
+						Retirer de ma bibliothèque
+					</button>
 				)}
 			</div>
 		</div>
