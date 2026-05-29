@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Pencil } from "lucide-react";
 import api from "@/api/axios";
 
 interface Volume {
@@ -25,6 +25,10 @@ function SeriePage() {
 	const [serie, setSerie] = useState<Serie | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [isFollowing, setIsFollowing] = useState(false);
+	const [isEditingVolumes, setIsEditingVolumes] = useState(false);
+	const [totalVolumes, setTotalVolumes] = useState<number | null>(
+		serie?.total_volumes ?? null,
+	);
 
 	useEffect(() => {
 		async function fetchSerie() {
@@ -64,6 +68,16 @@ function SeriePage() {
 				await api.post(`/follows/serie/${id}`);
 				setIsFollowing(true);
 			}
+		} catch (error) {
+			console.error(error);
+		}
+	};
+
+	const handleUpdateVolumes = async (value: number) => {
+		try {
+			await api.patch(`/serie/${id}`, { total_volumes: value });
+			setTotalVolumes(value);
+			setIsEditingVolumes(false);
 		} catch (error) {
 			console.error(error);
 		}
@@ -109,10 +123,45 @@ function SeriePage() {
 			</div>
 
 			{/* Progression */}
-			<p className="px-4 text-sm text-muted mb-4">
-				{serie.volumes.filter((v) => v.isInLibrary).length} /{" "}
-				{serie.volumes.length} tomes
-			</p>
+
+			<div className="px-4 mb-4 flex items-center gap-2">
+				<p className="text-sm text-muted">
+					{serie.volumes.filter((v) => v.isInLibrary).length}
+					{" / "}
+					{isEditingVolumes ? (
+						<input
+							type="number"
+							defaultValue={totalVolumes ?? ""}
+							onBlur={(e) => handleUpdateVolumes(Number(e.target.value))}
+							onKeyDown={(e) => {
+								if (e.key === "Enter")
+									handleUpdateVolumes(
+										Number((e.target as HTMLInputElement).value),
+									);
+							}}
+							autoFocus
+							style={{
+								width: "50px",
+								background: "transparent",
+								border: "1px solid #3f3f46",
+								borderRadius: "4px",
+								color: "#ffffff",
+								padding: "0 4px",
+								fontSize: "14px",
+							}}
+						/>
+					) : (
+						<span>{totalVolumes ?? "?"} tomes</span>
+					)}
+				</p>
+				<button
+					type="button"
+					onClick={() => setIsEditingVolumes(true)}
+					className="text-muted hover:text-accent"
+				>
+					<Pencil size={14} />
+				</button>
+			</div>
 
 			{/* Volumes list */}
 			<div className="flex flex-col gap-3 px-4">
