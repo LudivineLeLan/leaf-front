@@ -26,15 +26,14 @@ function SeriePage() {
 	const [loading, setLoading] = useState(true);
 	const [isFollowing, setIsFollowing] = useState(false);
 	const [isEditingVolumes, setIsEditingVolumes] = useState(false);
-	const [totalVolumes, setTotalVolumes] = useState<number | null>(
-		serie?.total_volumes ?? null,
-	);
+	const [totalVolumes, setTotalVolumes] = useState<number | null>(null);
 
 	useEffect(() => {
 		async function fetchSerie() {
 			try {
 				const { data } = await api.get(`/serie/${id}`);
 				setSerie(data);
+				setTotalVolumes(data.total_volumes ?? null);
 			} catch (error) {
 				console.error(error);
 			} finally {
@@ -162,6 +161,25 @@ function SeriePage() {
 					<Pencil size={14} />
 				</button>
 			</div>
+
+			{/* Progress bar */}
+			{totalVolumes && totalVolumes > 0 && (
+				<div className="px-4 mb-4">
+					<div className="w-full bg-surface-elevated rounded-full h-2">
+						<div
+							className="bg-accent rounded-full h-2 transition-all"
+							style={{
+								width: `${Math.min(
+									(serie.volumes.filter((v) => v.isInLibrary).length /
+										totalVolumes) *
+										100,
+									100,
+								)}%`,
+							}}
+						/>
+					</div>
+				</div>
+			)}
 
 			{/* Volumes list */}
 			<div className="flex flex-col gap-3 px-4">
