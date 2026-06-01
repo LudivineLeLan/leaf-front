@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { BookMarked, BookOpen, BookCheck } from "lucide-react";
-import api from "@/api/axios"; // base URL + auth with token for each request
+import api from "@/api/axios";
 
 type Status = "to_read" | "reading" | "finished";
 
@@ -34,6 +34,8 @@ const statusConfig: Record<Status, { label: string; icon: React.ReactNode }> = {
 function LibraryPage() {
 	const [userBooks, setUserBooks] = useState<UserBook[]>([]);
 	const [loading, setLoading] = useState(true);
+	const [statusFilter, setStatusFilter] = useState<Status | "all">("all");
+	const [serieFilter, setSerieFilter] = useState<number | "all">("all");
 	const navigate = useNavigate();
 
 	useEffect(() => {
@@ -47,14 +49,12 @@ function LibraryPage() {
 				setLoading(false);
 			}
 		};
-
 		fetchLibrary();
 	}, []);
 
 	const handleStatusChange = async (bookId: number, newStatus: Status) => {
 		try {
 			await api.put(`/library/${bookId}`, { status: newStatus });
-
 			setUserBooks((prev) =>
 				prev.map((userBook) =>
 					userBook.bookId === bookId
@@ -67,6 +67,26 @@ function LibraryPage() {
 		}
 	};
 
+	// Extract unique series present in the user's library
+	const availableSeries = Array.from(
+		new Map(
+			userBooks
+				.filter((userBook) => userBook.book?.serie)
+				.map((userBook) => [userBook.book!.serie!.id, userBook.book!.serie!]),
+		).values(),
+	);
+
+	// Apply status and serie filters on top of the loaded data
+	const filteredBooks = userBooks
+		.filter((userBook) => userBook.book !== null)
+		.filter(
+			(userBook) => statusFilter === "all" || userBook.status === statusFilter,
+		)
+		.filter(
+			(userBook) =>
+				serieFilter === "all" || userBook.book?.serie?.id === serieFilter,
+		);
+
 	if (loading)
 		return <p className="text-center text-gray-400 mt-10">Chargement...</p>;
 
@@ -78,6 +98,32 @@ function LibraryPage() {
 			</div>
 		);
 
+	const pillBase: React.CSSProperties = {
+		display: "inline-flex",
+		alignItems: "center",
+		gap: "4px",
+		padding: "4px 12px",
+		borderRadius: "999px",
+		fontSize: "12px",
+		border: "1px solid",
+		cursor: "pointer",
+		whiteSpace: "nowrap",
+	};
+
+	const pillActive: React.CSSProperties = {
+		...pillBase,
+		backgroundColor: "#34d399",
+		color: "#0f0f0f",
+		borderColor: "#34d399",
+	};
+
+	const pillInactive: React.CSSProperties = {
+		...pillBase,
+		backgroundColor: "transparent",
+		color: "#52525b",
+		borderColor: "#3f3f46",
+	};
+
 	return (
 		<div className="px-4 pt-6 pb-24 bg-background min-h-screen">
 			<h1
@@ -87,22 +133,86 @@ function LibraryPage() {
 				Bibliothèque
 			</h1>
 
-			<div className="flex flex-col gap-4">
-				{userBooks
-					.filter((userBook) => userBook.book !== null)
-					.map((userBook) => {
+			{/* Status filter pills */}
+			<div style={{ marginBottom: "12px" }}>
+				<div
+					style={{
+						display: "flex",
+						gap: "6px",
+						overflowX: "auto",
+						paddingBottom: "4px",
+						scrollbarWidth: "none",
+					}}
+				>
+					<button
+						style={statusFilter === "all" ? pillActive : pillInactive}
+						onClick={() => setStatusFilter("all")}
+					>
+						Tous
+					</button>
+					{(Object.keys(statusConfig) as Status[]).map((status) => (
+						<button
+							key={status}
+							style={statusFilter === status ? pillActive : pillInactive}
+							onClick={() => setStatusFilter(status)}
+						>
+							{statusConfig[status].icon}
+							{statusConfig[status].label}
+						</button>
+					))}
+				</div>
+			</div>
+
+			{/* Serie filter pills — only shown if the library contains at least one serie */}
+			{availableSeries.length > 0 && (
+				<div style={{ marginBottom: "20px" }}>
+					<div
+						style={{
+							display: "flex",
+							gap: "6px",
+							overflowX: "auto",
+							paddingBottom: "4px",
+							scrollbarWidth: "none",
+						}}
+					>
+						<button
+							style={serieFilter === "all" ? pillActive : pillInactive}
+							onClick={() => setSerieFilter("all")}
+						>
+							Toutes les séries
+						</button>
+						{availableSeries.map((serie) => (
+							<button
+								key={serie.id}
+								style={serieFilter === serie.id ? pillActive : pillInactive}
+								onClick={() => setSerieFilter(serie.id)}
+							>
+								{serie.name}
+							</button>
+						))}
+					</div>
+				</div>
+			)}
+
+			{/* Empty state when filters return no results */}
+			{filteredBooks.length === 0 ? (
+				<p className="text-center text-gray-400 mt-10">
+					Aucun livre pour ces filtres.
+				</p>
+			) : (
+				<div className="flex flex-col gap-4">
+					{filteredBooks.map((userBook) => {
 						const book = userBook.book!;
 						return (
 							<div
 								key={userBook.bookId}
 								className="flex gap-3 items-start bg-surface rounded-xl p-3"
 							>
-								{/* Clickable zone */}
+								{/* Clickable zone — navigates to book detail */}
 								<div
 									className="flex gap-3 items-start flex-1 cursor-pointer"
 									onClick={() => navigate(`/book/${userBook.bookId}`)}
 								>
-									{/* Cover */}
 									{book.cover ? (
 										<img
 											src={book.cover}
@@ -115,7 +225,6 @@ function LibraryPage() {
 										</div>
 									)}
 
-									{/* Title + Serie */}
 									<div className="flex flex-col gap-1 min-w-0">
 										<p className="font-medium text-sm leading-tight line-clamp-2 text-primary">
 											{book.title}
@@ -123,8 +232,8 @@ function LibraryPage() {
 										{book.serie?.id && (
 											<p
 												className="text-xs text-accent cursor-pointer hover:underline"
-												onClick={(e) => {
-													e.stopPropagation();
+												onClick={(event) => {
+													event.stopPropagation();
 													navigate(`/serie/${book.serie!.id}`);
 												}}
 											>
@@ -172,7 +281,8 @@ function LibraryPage() {
 							</div>
 						);
 					})}
-			</div>
+				</div>
+			)}
 		</div>
 	);
 }
