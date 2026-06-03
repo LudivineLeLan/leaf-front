@@ -24,7 +24,7 @@ function LoginPage() {
 
 		try {
 			const { data } = await api.post("/auth/login", formData);
-			login(data.user, data.token);
+			login(data.user);
 			navigate("/search");
 		} catch (error) {
 			setError("Email ou mot de passe incorrect");
