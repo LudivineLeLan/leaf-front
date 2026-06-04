@@ -182,11 +182,31 @@ function SeriePage() {
 			)}
 
 			{/* Volumes list */}
+			{/* Volumes list */}
 			<div className="flex flex-col gap-3 px-4">
 				{serie.volumes.map((volume) => (
 					<div
 						key={volume.googleBooksId}
-						className="flex gap-3 items-center bg-surface rounded-xl p-3"
+						className="flex gap-3 items-center bg-surface rounded-xl p-3 cursor-pointer"
+						onClick={async () => {
+							if (volume.libraryBookId) {
+								navigate(`/book/${volume.libraryBookId}`);
+							} else {
+								try {
+									const { data: importedBook } = await api.post(
+										"/books/import",
+										{
+											googleBooksId: volume.googleBooksId,
+											title: volume.title,
+											thumbnail: volume.cover,
+										},
+									);
+									navigate(`/book/${importedBook.id}`);
+								} catch (error) {
+									console.error(error);
+								}
+							}
+						}}
 					>
 						{/* Cover */}
 						{volume.cover ? (

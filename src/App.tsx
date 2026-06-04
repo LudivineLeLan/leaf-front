@@ -11,6 +11,7 @@ import BottomNav from "@/components/BottomNav";
 import NotificationsPage from "./pages/NotificationsPage";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useLocation } from "react-router-dom";
+import AuthorPage from "./pages/AuthorPage";
 
 const noNavPages = ["/login", "/register"]; //no nav menu in those pages
 
@@ -49,6 +50,14 @@ function App() {
 					element={
 						<ProtectedRoute>
 							<NotificationsPage />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/author/:authorId"
+					element={
+						<ProtectedRoute>
+							<AuthorPage />
 						</ProtectedRoute>
 					}
 				/>

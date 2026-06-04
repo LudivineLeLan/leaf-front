@@ -143,7 +143,10 @@ function BookDetailPage() {
 								key={author.id}
 								className="flex items-center justify-between"
 							>
-								<p className="text-sm text-secondary">
+								<p
+									className="text-sm text-secondary cursor-pointer hover:text-accent"
+									onClick={() => navigate(`/author/${author.id}`)}
+								>
 									{author.firstname} {author.name}
 								</p>
 								<button
