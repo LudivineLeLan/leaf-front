@@ -21,7 +21,6 @@ function SearchPage() {
 	const [loading, setLoading] = useState(false);
 	const [successMessage, setSuccessMessage] = useState<string | null>(null);
 	const navigate = useNavigate();
-	const [searchType, setSearchType] = useState<"title" | "author">("title");
 
 	// Wait 500ms after last letter
 	useEffect(() => {
@@ -55,8 +54,6 @@ function SearchPage() {
 	}, [debouncedQuery]);
 
 	const handleSearch = async (value: string) => {
-		const searchQuery = searchType === "author" ? `auteur:${value}` : value;
-		const { data } = await api.get(`/books/search?q=${searchQuery}`);
 		setQuery(value);
 
 		setLoading(true);
@@ -133,42 +130,6 @@ function SearchPage() {
 					className="absolute left-3 text-muted pointer-events-none"
 					size={18}
 				/>
-				<div className="flex gap-2 mb-3">
-					<button
-						type="button"
-						onClick={() => setSearchType("title")}
-						style={{
-							padding: "4px 12px",
-							borderRadius: "999px",
-							fontSize: "12px",
-							border: "1px solid",
-							cursor: "pointer",
-							backgroundColor:
-								searchType === "title" ? "#34d399" : "transparent",
-							color: searchType === "title" ? "#0f0f0f" : "#52525b",
-							borderColor: searchType === "title" ? "#34d399" : "#3f3f46",
-						}}
-					>
-						Titre
-					</button>
-					<button
-						type="button"
-						onClick={() => setSearchType("author")}
-						style={{
-							padding: "4px 12px",
-							borderRadius: "999px",
-							fontSize: "12px",
-							border: "1px solid",
-							cursor: "pointer",
-							backgroundColor:
-								searchType === "author" ? "#34d399" : "transparent",
-							color: searchType === "author" ? "#0f0f0f" : "#52525b",
-							borderColor: searchType === "author" ? "#34d399" : "#3f3f46",
-						}}
-					>
-						Auteur
-					</button>
-				</div>
 				<input
 					type="text"
 					value={query}
