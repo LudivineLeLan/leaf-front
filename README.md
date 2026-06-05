@@ -1,16 +1,65 @@
-# React + Vite
+# Leaf - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Interface utilisateur de l'application Leaf, une bibliothèque personnelle de livres et mangas inspirée de TV Time.
 
-Currently, two official plugins are available:
+## Stack technique
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **React** avec TypeScript
+- **Vite** comme bundler
+- **Tailwind CSS** pour le style
+- **shadcn/ui** pour les composants
+- **React Router** pour la navigation
+- **Axios** pour les appels API
 
-## React Compiler
+## Prérequis
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Node.js v20+
+- Le backend Leaf doit être lancé sur `http://localhost:3000`
 
-## Expanding the ESLint configuration
+## Installation
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+npm install
+```
+
+## Lancer l'application
+
+```bash
+npm run dev
+```
+
+L'application est accessible sur `http://localhost:5173`.
+
+## Pages
+
+| Page | Route | Description |
+|------|-------|-------------|
+| Recherche | `/search` | Recherche de livres par titre ou auteur |
+| Bibliothèque | `/library` | Livres groupés par série |
+| Statistiques | `/stats` | Chiffres clés de lecture |
+| Profil | `/profile` | Infos utilisateur et déconnexion |
+| Alertes | `/notifications` | Nouvelles parutions |
+| Détail livre | `/book/:bookId` | Fiche complète d'un livre |
+| Série | `/serie/:id` | Tous les tomes d'une série |
+| Auteur | `/author/:authorId` | Tous les livres d'un auteur |
+| Login | `/login` | Connexion |
+| Register | `/register` | Création de compte |
+
+## Fonctionnalités
+
+- 🔍 Recherche de livres via Google Books
+- 📚 Bibliothèque personnelle organisée par séries
+- 📖 Suivi de progression dans une série
+- ✅ Statuts de lecture (À lire, En cours, Lu)
+- 🔔 Alertes de nouvelles parutions
+- 👤 Suivi d'auteurs et de séries
+- 🌙 Interface en mode sombre
+
+## Design
+
+L'interface est conçue en **mobile first** avec un thème sombre inspiré d'apps comme SNCF Connect et PolarSteps.
+
+Couleurs principales :
+- Fond : `#0f0f0f`
+- Surface : `#1c1c1e`
+- Accent : `#34d399`
