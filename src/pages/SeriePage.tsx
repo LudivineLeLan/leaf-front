@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Pencil } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import api from "@/api/axios";
 
 interface Volume {
@@ -77,6 +77,29 @@ function SeriePage() {
 			await api.patch(`/serie/${id}`, { total_volumes: value });
 			setTotalVolumes(value);
 			setIsEditingVolumes(false);
+		} catch (error) {
+			console.error(error);
+		}
+	};
+
+	const handleRemoveBook = async (
+		libraryBookId: number,
+		event: React.MouseEvent,
+	) => {
+		event.stopPropagation(); // Prevent navigation to book detail
+		try {
+			await api.delete(`/library/${libraryBookId}`);
+			setSerie((prev) => {
+				if (!prev) return prev;
+				return {
+					...prev,
+					volumes: prev.volumes.map((volume) =>
+						volume.libraryBookId === libraryBookId
+							? { ...volume, isInLibrary: false, libraryBookId: null }
+							: volume,
+					),
+				};
+			});
 		} catch (error) {
 			console.error(error);
 		}
@@ -182,7 +205,6 @@ function SeriePage() {
 			)}
 
 			{/* Volumes list */}
-			{/* Volumes list */}
 			<div className="flex flex-col gap-3 px-4">
 				{serie.volumes.map((volume) => (
 					<div
@@ -229,11 +251,26 @@ function SeriePage() {
 									Tome {volume.seriesPosition}
 								</p>
 							)}
-							<p
-								className={`text-xs mt-1 ${volume.isInLibrary ? "text-accent" : "text-muted"}`}
-							>
-								{volume.isInLibrary ? "✓ Dans ta bibliothèque" : "Non possédé"}
-							</p>
+							<div className="flex items-center justify-between mt-1">
+								<p
+									className={`text-xs ${volume.isInLibrary ? "text-accent" : "text-muted"}`}
+								>
+									{volume.isInLibrary
+										? "✓ Dans ta bibliothèque"
+										: "Non possédé"}
+								</p>
+								{volume.isInLibrary && volume.libraryBookId && (
+									<button
+										type="button"
+										onClick={(event) =>
+											handleRemoveBook(volume.libraryBookId!, event)
+										}
+										className="text-muted hover:text-red-400 transition-colors"
+									>
+										<Trash2 size={14} />
+									</button>
+								)}
+							</div>
 						</div>
 					</div>
 				))}
