@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import api from "@/api/axios";
+import AddButton from "@/components/AddButton";
 
 interface Volume {
 	googleBooksId: string;
@@ -77,6 +78,35 @@ function SeriePage() {
 			await api.patch(`/serie/${id}`, { total_volumes: value });
 			setTotalVolumes(value);
 			setIsEditingVolumes(false);
+		} catch (error) {
+			console.error(error);
+		}
+	};
+
+	const handleAddBook = async (volume: Volume, event: React.MouseEvent) => {
+		event.stopPropagation();
+		try {
+			const { data: importedBook } = await api.post("/books/import", {
+				googleBooksId: volume.googleBooksId,
+				title: volume.title,
+				thumbnail: volume.cover,
+			});
+			await api.post(`/library/${importedBook.id}`, { status: "to_read" });
+			setSerie((prev) => {
+				if (!prev) return prev;
+				return {
+					...prev,
+					volumes: prev.volumes.map((existingVolume) =>
+						existingVolume.googleBooksId === volume.googleBooksId
+							? {
+									...existingVolume,
+									isInLibrary: true,
+									libraryBookId: importedBook.id,
+								}
+							: existingVolume,
+					),
+				};
+			});
 		} catch (error) {
 			console.error(error);
 		}
@@ -252,23 +282,29 @@ function SeriePage() {
 								</p>
 							)}
 							<div className="flex items-center justify-between mt-1">
-								<p
-									className={`text-xs ${volume.isInLibrary ? "text-accent" : "text-muted"}`}
-								>
-									{volume.isInLibrary
-										? "✓ Dans ta bibliothèque"
-										: "Non possédé"}
-								</p>
-								{volume.isInLibrary && volume.libraryBookId && (
-									<button
-										type="button"
-										onClick={(event) =>
-											handleRemoveBook(volume.libraryBookId!, event)
-										}
-										className="text-muted hover:text-red-400 transition-colors"
-									>
-										<Trash2 size={14} />
-									</button>
+								{volume.isInLibrary ? (
+									<>
+										<p className="text-xs text-accent">
+											✓ Dans ta bibliothèque
+										</p>
+										{volume.libraryBookId && (
+											<button
+												type="button"
+												onClick={(event) =>
+													handleRemoveBook(volume.libraryBookId!, event)
+												}
+												className="text-muted hover:text-red-400 transition-colors"
+											>
+												<Trash2 size={14} />
+											</button>
+										)}
+									</>
+								) : (
+									<div onClick={(event) => event.stopPropagation()}>
+										<AddButton
+											onClick={(event) => handleAddBook(volume, event)}
+										/>
+									</div>
 								)}
 							</div>
 						</div>

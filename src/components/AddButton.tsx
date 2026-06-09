@@ -1,4 +1,8 @@
-function AddButton({ onClick }: { onClick: () => void }) {
+function AddButton({
+	onClick,
+}: {
+	onClick: (event: React.MouseEvent) => void;
+}) {
 	return (
 		<button
 			onClick={onClick}
