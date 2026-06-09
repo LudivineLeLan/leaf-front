@@ -34,12 +34,16 @@ function BookDetailPage() {
 	const [book, setBook] = useState<BookDetail | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [followedAuthors, setFollowedAuthors] = useState<number[]>([]);
+	const [userStatus, setUserStatus] = useState<string | null>(
+		book?.userStatus ?? null,
+	);
 
 	useEffect(() => {
 		const fetchBook = async () => {
 			try {
 				const { data } = await api.get(`/books/id/${bookId}`);
 				setBook(data);
+				setUserStatus(data.userStatus ?? null);
 			} catch (error) {
 				console.error(error);
 			} finally {
@@ -48,6 +52,15 @@ function BookDetailPage() {
 		};
 		fetchBook();
 	}, [bookId]);
+
+	const handleStatusChange = async (newStatus: string) => {
+		try {
+			await api.put(`/library/${bookId}`, { status: newStatus });
+			setUserStatus(newStatus);
+		} catch (error) {
+			console.error(error);
+		}
+	};
 
 	useEffect(() => {
 		const fetchFollows = async () => {
@@ -133,6 +146,36 @@ function BookDetailPage() {
 						{book.seriesPosition && ` • Tome ${book.seriesPosition}`}
 						{book.serie.total_volumes && ` / ${book.serie.total_volumes}`}
 					</p>
+				)}
+
+				{/* Status */}
+				{book.isInLibrary && (
+					<div className="flex gap-2">
+						{(["to_read", "reading", "finished"] as const).map((statusKey) => (
+							<button
+								key={statusKey}
+								type="button"
+								onClick={() => handleStatusChange(statusKey)}
+								style={{
+									padding: "4px 12px",
+									borderRadius: "999px",
+									fontSize: "11px",
+									border: "1px solid",
+									cursor: "pointer",
+									backgroundColor:
+										userStatus === statusKey ? "#34d399" : "transparent",
+									color: userStatus === statusKey ? "#0f0f0f" : "#52525b",
+									borderColor: userStatus === statusKey ? "#34d399" : "#3f3f46",
+								}}
+							>
+								{statusKey === "to_read"
+									? "À lire"
+									: statusKey === "reading"
+										? "En cours"
+										: "Lu"}
+							</button>
+						))}
+					</div>
 				)}
 
 				{/* Authors */}
