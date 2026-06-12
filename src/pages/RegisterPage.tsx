@@ -38,7 +38,9 @@ function RegisterPage() {
 	return (
 		<div className="min-h-screen bg-background flex flex-col justify-center px-6">
 			<div className="mb-10 text-center">
-				<h1 className="text-4xl font-bold text-accent">Leaf 🍃</h1>
+				<h1 className="text-4xl font-bold text-accent">
+					<Link to="/search">Leaf</Link>
+				</h1>
 				<p className="text-secondary mt-2">Crée ton compte</p>
 			</div>
 
