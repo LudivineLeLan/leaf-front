@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import api from "@/api/axios";
 import { useAuth } from "@/context/AuthContext";
+import { getEmailWarning } from "@/utils/validation";
 
 function LoginPage() {
 	const { login } = useAuth();
@@ -13,12 +13,15 @@ function LoginPage() {
 	const [error, setError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
 
+	const emailWarning = getEmailWarning(formData.email);
+
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setFormData({ ...formData, [event.target.name]: event.target.value });
 	};
 
 	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
+		if (emailWarning) return;
 		setLoading(true);
 		setError(null);
 
@@ -26,7 +29,7 @@ function LoginPage() {
 			const { data } = await api.post("/auth/login", formData);
 			login(data.user);
 			navigate("/search");
-		} catch (error) {
+		} catch {
 			setError("Email ou mot de passe incorrect");
 		} finally {
 			setLoading(false);
@@ -60,6 +63,9 @@ function LoginPage() {
 						required
 						className="bg-surface border border-border rounded-lg px-4 py-2.5 text-sm text-primary placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent"
 					/>
+					{emailWarning && (
+						<p className="text-orange-400 text-xs mt-0.5">{emailWarning}</p>
+					)}
 				</div>
 
 				<div className="flex flex-col gap-1">
@@ -81,7 +87,7 @@ function LoginPage() {
 
 				<button
 					type="submit"
-					disabled={loading}
+					disabled={loading || !!emailWarning}
 					className="mt-2 bg-accent hover:bg-accent-hover text-background font-semibold py-2.5 rounded-lg transition-colors disabled:opacity-50"
 				>
 					{loading ? "Connexion..." : "Se connecter"}

@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import api from "@/api/axios";
+import {
+	getEmailWarning,
+	getUsernameWarning,
+	getPasswordWarning,
+} from "@/utils/validation";
 
 function RegisterPage() {
 	const navigate = useNavigate();
@@ -13,12 +17,19 @@ function RegisterPage() {
 	const [error, setError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
 
+	const usernameWarning = getUsernameWarning(formData.username);
+	const emailWarning = getEmailWarning(formData.email);
+	const passwordWarning = getPasswordWarning(formData.password);
+
+	const hasWarnings = !!(usernameWarning || emailWarning || passwordWarning);
+
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setFormData({ ...formData, [event.target.name]: event.target.value });
 	};
 
 	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
+		if (hasWarnings) return;
 		setLoading(true);
 		setError(null);
 
@@ -58,6 +69,9 @@ function RegisterPage() {
 						required
 						className="bg-surface border border-border rounded-lg px-4 py-2.5 text-sm text-primary placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent"
 					/>
+					{usernameWarning && (
+						<p className="text-orange-400 text-xs mt-0.5">{usernameWarning}</p>
+					)}
 				</div>
 
 				<div className="flex flex-col gap-1">
@@ -71,6 +85,9 @@ function RegisterPage() {
 						required
 						className="bg-surface border border-border rounded-lg px-4 py-2.5 text-sm text-primary placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent"
 					/>
+					{emailWarning && (
+						<p className="text-orange-400 text-xs mt-0.5">{emailWarning}</p>
+					)}
 				</div>
 
 				<div className="flex flex-col gap-1">
@@ -86,13 +103,16 @@ function RegisterPage() {
 						required
 						className="bg-surface border border-border rounded-lg px-4 py-2.5 text-sm text-primary placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent"
 					/>
+					{passwordWarning && (
+						<p className="text-orange-400 text-xs mt-0.5">{passwordWarning}</p>
+					)}
 				</div>
 
 				{error && <p className="text-red-400 text-sm">{error}</p>}
 
 				<button
 					type="submit"
-					disabled={loading}
+					disabled={loading || hasWarnings}
 					className="mt-2 bg-accent hover:bg-accent-hover text-background font-semibold py-2.5 rounded-lg transition-colors disabled:opacity-50"
 				>
 					{loading ? "Inscription..." : "S'inscrire"}
