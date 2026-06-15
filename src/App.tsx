@@ -22,7 +22,7 @@ function App() {
 	return (
 		<div className="min-h-screen pb-24">
 			<Routes>
-				<Route path="/" element={<Navigate to="/login" />} />
+				<Route path="/" element={<Navigate to="/search" />} />
 				<Route path="/login" element={<LoginPage />} />
 				<Route path="/register" element={<RegisterPage />} />
 				<Route path="/search" element={<SearchPage />} />
