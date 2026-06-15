@@ -27,14 +27,7 @@ function App() {
 				<Route path="/register" element={<RegisterPage />} />
 				<Route path="/search" element={<SearchPage />} />
 				<Route path="/library" element={<LibraryPage />} />
-				<Route
-					path="/book/:bookId"
-					element={
-						<ProtectedRoute>
-							<BookDetailPage />
-						</ProtectedRoute>
-					}
-				/>
+				<Route path="/book/:bookId" element={<BookDetailPage />} />
 				<Route path="/stats" element={<StatsPage />} />
 				<Route path="/profile" element={<ProfilePage />} />
 				<Route

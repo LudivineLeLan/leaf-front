@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
 import api from "@/api/axios";
 import AddButton from "@/components/AddButton";
+import { useAuth } from "@/context/AuthContext";
 
 interface Book {
 	googleBooksId: string;
@@ -21,6 +22,7 @@ function SearchPage() {
 	const [loading, setLoading] = useState(false);
 	const [successMessage, setSuccessMessage] = useState<string | null>(null);
 	const navigate = useNavigate();
+	const { user } = useAuth();
 
 	// Wait 500ms after last letter
 	useEffect(() => {
@@ -68,6 +70,10 @@ function SearchPage() {
 	};
 
 	const handleAddBook = async (book: Book) => {
+		if (!user) {
+			navigate("/login");
+			return;
+		}
 		try {
 			// 1. Import book in db
 			const { data: importedBook } = await api.post("/books/import", {
@@ -97,6 +103,10 @@ function SearchPage() {
 	};
 
 	const handleOpenBook = async (book: Book) => {
+		if (!user) {
+    navigate("/login");
+    return;
+  }
 		try {
 			const { data: importedBook } = await api.post("/books/import", {
 				googleBooksId: book.googleBooksId,
