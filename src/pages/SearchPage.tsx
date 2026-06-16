@@ -44,7 +44,7 @@ function SearchPage() {
 			setLoading(true);
 			try {
 				const { data } = await api.get(`/books/search?q=${debouncedQuery}`);
-				setResults(data);
+				setResults(Array.isArray(data) ? data : []);
 			} catch (error) {
 				console.error(error);
 			} finally {
@@ -55,18 +55,8 @@ function SearchPage() {
 		fetchResults();
 	}, [debouncedQuery]);
 
-	const handleSearch = async (value: string) => {
+	const handleSearch = (value: string) => {
 		setQuery(value);
-
-		setLoading(true);
-		try {
-			const { data } = await api.get(`/books/search?q=${value}`);
-			setResults(data);
-		} catch (error) {
-			console.error(error);
-		} finally {
-			setLoading(false);
-		}
 	};
 
 	const handleAddBook = async (book: Book) => {
@@ -104,9 +94,9 @@ function SearchPage() {
 
 	const handleOpenBook = async (book: Book) => {
 		if (!user) {
-    navigate("/login");
-    return;
-  }
+			navigate("/login");
+			return;
+		}
 		try {
 			const { data: importedBook } = await api.post("/books/import", {
 				googleBooksId: book.googleBooksId,
