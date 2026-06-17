@@ -50,3 +50,23 @@ export const googleBooksSearchByAuthor = async (
 		language: item.volumeInfo?.language || null,
 	}));
 };
+
+export const googleBooksSearchSerie = async (
+	query: string,
+): Promise<GoogleBook[]> => {
+	const response = await fetch(
+		`${BASE_URL}?q=${encodeURIComponent(query)}&maxResults=40&key=${API_KEY}`,
+	);
+	if (!response.ok) throw new Error("Google Books API error");
+	const data = await response.json();
+	if (!data.items) return [];
+	return data.items.map((item: any) => ({
+		googleBooksId: item.id,
+		title: item.volumeInfo?.title || "Titre inconnu",
+		authors: item.volumeInfo?.authors || [],
+		thumbnail: item.volumeInfo?.imageLinks?.thumbnail || null,
+		publishedDate: item.volumeInfo?.publishedDate || null,
+		description: item.volumeInfo?.description || null,
+		language: item.volumeInfo?.language || null,
+	}));
+};

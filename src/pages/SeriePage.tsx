@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import api from "@/api/axios";
 import AddButton from "@/components/AddButton";
+import { googleBooksSearchSerie } from "@/api/googleBooks";
+import { extractSeriesInfo } from "@/utils/seriesInfo";
 
 interface Volume {
 	googleBooksId: string;
@@ -33,7 +35,48 @@ function SeriePage() {
 		async function fetchSerie() {
 			try {
 				const { data } = await api.get(`/serie/${id}`);
-				setSerie(data);
+
+				// Search Google Books from frontend
+				const googleResults = await googleBooksSearchSerie(data.searchQuery);
+
+				// Deduplicate and filter by serie name
+				const seen = new Set();
+				const uniqueResults = googleResults.filter((book) => {
+					if (seen.has(book.googleBooksId)) return false;
+					seen.add(book.googleBooksId);
+					return book.title.toLowerCase().startsWith(data.name.toLowerCase());
+				});
+
+				// Cross with library books
+				const volumes = uniqueResults
+					.map((googleBook) => {
+						const bookInLibrary = data.libraryBooks.find(
+							(book: { googleBooksId: string }) =>
+								book.googleBooksId === googleBook.googleBooksId,
+						);
+						const seriesInfo = extractSeriesInfo(googleBook.title);
+						return {
+							googleBooksId: googleBook.googleBooksId,
+							title: googleBook.title,
+							cover: googleBook.thumbnail,
+							seriesPosition:
+								bookInLibrary?.seriesPosition || seriesInfo?.position || null,
+							isInLibrary: !!bookInLibrary,
+							libraryBookId: bookInLibrary?.id || null,
+						};
+					})
+					.sort((a, b) => {
+						if (a.seriesPosition === null) return 1;
+						if (b.seriesPosition === null) return -1;
+						return a.seriesPosition - b.seriesPosition;
+					});
+
+				setSerie({
+					id: data.id,
+					name: data.name,
+					total_volumes: data.total_volumes,
+					volumes,
+				});
 				setTotalVolumes(data.total_volumes ?? null);
 			} catch (error) {
 				console.error(error);
