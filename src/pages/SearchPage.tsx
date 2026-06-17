@@ -4,6 +4,7 @@ import { Search } from "lucide-react";
 import api from "@/api/axios";
 import AddButton from "@/components/AddButton";
 import { useAuth } from "@/context/AuthContext";
+import { googleBooksSearch } from "@/api/googleBooks";
 
 interface Book {
 	googleBooksId: string;
@@ -43,17 +44,33 @@ function SearchPage() {
 		const fetchResults = async () => {
 			setLoading(true);
 			try {
-				const { data } = await api.get(`/books/search?q=${debouncedQuery}`);
-				setResults(Array.isArray(data) ? data : []);
+				const books = await googleBooksSearch(debouncedQuery);
+
+				let libraryGoogleIds: string[] = [];
+				if (user) {
+					const { data: libraryData } = await api.get("/library");
+					libraryGoogleIds = libraryData.map(
+						(item: { book: { googleBooksId: string } }) =>
+							item.book.googleBooksId,
+					);
+				}
+
+				setResults(
+					books.map((book) => ({
+						...book,
+						isInLibrary: libraryGoogleIds.includes(book.googleBooksId),
+					})),
+				);
 			} catch (error) {
 				console.error(error);
+				setResults([]);
 			} finally {
 				setLoading(false);
 			}
 		};
 
 		fetchResults();
-	}, [debouncedQuery]);
+	}, [debouncedQuery, user]);
 
 	const handleSearch = (value: string) => {
 		setQuery(value);
