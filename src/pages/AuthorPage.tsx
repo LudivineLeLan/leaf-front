@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import api from "@/api/axios";
 import AddButton from "@/components/AddButton";
+import { useAuth } from "@/context/AuthContext";
+import { googleBooksSearchByAuthor } from "@/api/googleBooks";
 
 interface AuthorBook {
 	googleBooksId: string;
@@ -16,20 +18,64 @@ interface Author {
 	id: number;
 	name: string;
 	firstname: string | null;
-	books: AuthorBook[];
 }
 
 function AuthorPage() {
 	const { authorId } = useParams<{ authorId: string }>();
 	const navigate = useNavigate();
+	const { user } = useAuth();
 	const [author, setAuthor] = useState<Author | null>(null);
+	const [books, setBooks] = useState<AuthorBook[]>([]);
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
 		async function fetchAuthor() {
 			try {
+				// 1. Get author info from backend
 				const { data } = await api.get(`/authors/${authorId}`);
 				setAuthor(data);
+
+				const fullName = `${data.firstname || ""} ${data.name}`.trim();
+
+				// 2. Search books from Google Books frontend-side
+				const googleResults = await googleBooksSearchByAuthor(fullName);
+
+				// 3. Deduplicate
+				const seen = new Set();
+				const uniqueResults = googleResults.filter((book) => {
+					if (seen.has(book.googleBooksId)) return false;
+					seen.add(book.googleBooksId);
+					return true;
+				});
+
+				// 4. Filter by author name match
+				const filtered = uniqueResults.filter((book) =>
+					book.authors?.some(
+						(authorName) =>
+							authorName.toLowerCase().includes(fullName.toLowerCase()) ||
+							fullName.toLowerCase().includes(authorName.toLowerCase()),
+					),
+				);
+
+				// 5. Check library
+				let libraryGoogleIds: string[] = [];
+				if (user) {
+					const { data: libraryData } = await api.get("/library");
+					libraryGoogleIds = libraryData.map(
+						(item: { book: { googleBooksId: string } }) =>
+							item.book.googleBooksId,
+					);
+				}
+
+				setBooks(
+					filtered.map((book) => ({
+						googleBooksId: book.googleBooksId,
+						title: book.title,
+						cover: book.thumbnail,
+						publishedDate: book.publishedDate,
+						isInLibrary: libraryGoogleIds.includes(book.googleBooksId),
+					})),
+				);
 			} catch (error) {
 				console.error(error);
 			} finally {
@@ -37,7 +83,7 @@ function AuthorPage() {
 			}
 		}
 		fetchAuthor();
-	}, [authorId]);
+	}, [authorId, user]);
 
 	const handleAddBook = async (book: AuthorBook) => {
 		try {
@@ -47,17 +93,12 @@ function AuthorPage() {
 				thumbnail: book.cover,
 			});
 			await api.post(`/library/${importedBook.id}`, { status: "to_read" });
-			setAuthor((prev) =>
-				prev
-					? {
-							...prev,
-							books: prev.books.map((existingBook) =>
-								existingBook.googleBooksId === book.googleBooksId
-									? { ...existingBook, isInLibrary: true }
-									: existingBook,
-							),
-						}
-					: prev,
+			setBooks((prev) =>
+				prev.map((existingBook) =>
+					existingBook.googleBooksId === book.googleBooksId
+						? { ...existingBook, isInLibrary: true }
+						: existingBook,
+				),
 			);
 		} catch (error) {
 			console.error(error);
@@ -71,7 +112,6 @@ function AuthorPage() {
 
 	return (
 		<div className="pb-24 bg-background min-h-screen">
-			{/* Header */}
 			<div className="flex items-center gap-3 px-4 pt-6 mb-6">
 				<button
 					type="button"
@@ -85,9 +125,8 @@ function AuthorPage() {
 				</h1>
 			</div>
 
-			{/* Books list */}
 			<div className="flex flex-col gap-3 px-4">
-				{author.books.map((book) => (
+				{books.map((book) => (
 					<div
 						key={book.googleBooksId}
 						className="flex gap-3 items-start bg-surface rounded-xl p-3"
@@ -103,7 +142,6 @@ function AuthorPage() {
 								No cover
 							</div>
 						)}
-
 						<div className="flex flex-col gap-1 flex-1 min-w-0">
 							<p className="font-medium text-sm text-primary leading-tight line-clamp-2">
 								{book.title}
