@@ -1,3 +1,5 @@
+import { cn } from "@/lib/utils";
+
 function AddButton({
 	onClick,
 }: {
@@ -6,18 +8,7 @@ function AddButton({
 	return (
 		<button
 			onClick={onClick}
-			style={{
-				backgroundColor: "#34d399",
-				color: "#0f0f0f",
-				border: "none",
-				borderRadius: "999px",
-				padding: "4px 16px",
-				fontSize: "12px",
-				cursor: "pointer",
-				display: "inline-block",
-				width: "auto",
-				fontWeight: "600",
-			}}
+			className="bg-accent hover:bg-accent-hover text-background rounded-full px-4 py-1 text-xs font-semibold cursor-pointer transition-colors"
 		>
 			+ Ajouter
 		</button>
