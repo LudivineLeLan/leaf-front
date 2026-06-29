@@ -1,17 +1,16 @@
-import { Routes, Route, Navigate } from "react-router-dom";
-import SearchPage from "@/pages/SearchPage"; //@page for src path
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import SearchPage from "@/pages/SearchPage";
 import LibraryPage from "@/pages/LibraryPage";
 import StatsPage from "@/pages/StatsPage";
 import ProfilePage from "@/pages/ProfilePage";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import BookDetailPage from "@/pages/BookDetailPage";
-import SeriePage from "./pages/SeriePage";
+import SeriePage from "@/pages/SeriePage";
 import BottomNav from "@/components/BottomNav";
-import NotificationsPage from "./pages/NotificationsPage";
+import NotificationsPage from "@/pages/NotificationsPage";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import { useLocation } from "react-router-dom";
-import AuthorPage from "./pages/AuthorPage";
+import AuthorPage from "@/pages/AuthorPage";
 
 const noNavPages = ["/login", "/register"]; //no nav menu in those pages
 
@@ -55,13 +54,7 @@ function App() {
 					}
 				/>
 			</Routes>
-			{showNav && (
-				<>
-					<div className="h-20" />{" "}
-					{/* Spacer to avoid content superposition on navbar */}
-					<BottomNav />
-				</>
-			)}
+			{showNav && <BottomNav />}
 		</div>
 	);
 }
