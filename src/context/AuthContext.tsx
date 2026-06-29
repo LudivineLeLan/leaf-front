@@ -30,7 +30,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	useEffect(() => {
 		async function fetchMe() {
 			try {
-				const { data } = await api.get("/auth/me");
+				// Typed as User to ensure the response matches the expected shape
+				const { data } = await api.get<User>("/auth/me");
 				setUser(data);
 			} catch {
 				setUser(null);
@@ -41,13 +42,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		fetchMe();
 	}, []);
 
-	const login = (userData: User, token: string) => {
+	const login = (userData: User) => {
 		setUser(userData);
 	};
 
 	const logout = async () => {
-		await api.post("/auth/logout");
-		setUser(null);
+		try {
+			await api.post("/auth/logout");
+		} finally {
+			// Always clear local state, even if the server request fails,
+			// to avoid leaving the user stuck in an authenticated state
+			setUser(null);
+		}
 	};
 
 	return (
