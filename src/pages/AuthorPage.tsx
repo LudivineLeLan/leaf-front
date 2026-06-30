@@ -49,12 +49,15 @@ function AuthorPage() {
 				});
 
 				// 4. Filter by author name match
+				const fullNameLower = fullName.toLowerCase();
 				const filtered = uniqueResults.filter((book) =>
-					book.authors?.some(
-						(authorName) =>
-							authorName.toLowerCase().includes(fullName.toLowerCase()) ||
-							fullName.toLowerCase().includes(authorName.toLowerCase()),
-					),
+					book.authors?.some((authorName) => {
+						const authorNameLower = authorName.toLowerCase();
+						return (
+							authorNameLower.includes(fullNameLower) ||
+							fullNameLower.includes(authorNameLower)
+						);
+					}),
 				);
 
 				// 5. Check library
