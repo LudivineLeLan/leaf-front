@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import api from "@/api/axios";
 
 interface Book {
@@ -34,15 +34,18 @@ interface LibraryOverview {
 function LibraryPage() {
 	const [overview, setOverview] = useState<LibraryOverview | null>(null);
 	const [loading, setLoading] = useState(true);
+	// Separate error state to distinguish a fetch failure from an empty library
+	const [error, setError] = useState(false);
 	const navigate = useNavigate();
 
 	useEffect(() => {
 		const fetchOverview = async () => {
 			try {
-				const { data } = await api.get("/library/overview");
+				const { data } = await api.get<LibraryOverview>("/library/overview");
 				setOverview(data);
 			} catch (error) {
 				console.error(error);
+				setError(true);
 			} finally {
 				setLoading(false);
 			}
@@ -52,6 +55,15 @@ function LibraryPage() {
 
 	if (loading)
 		return <p className="text-center text-muted mt-10">Chargement...</p>;
+
+	// Show a dedicated error message instead of the empty library state,
+	// so the user isn't misled into thinking their library is empty
+	if (error)
+		return (
+			<p className="text-center text-muted mt-10">
+				Impossible de charger ta bibliothèque.
+			</p>
+		);
 
 	if (
 		!overview ||
@@ -66,12 +78,8 @@ function LibraryPage() {
 
 	return (
 		<div className="px-4 pt-6 pb-24 bg-background min-h-screen">
-			<h1
-				className="text-2xl font-bold text-primary"
-				style={{ marginBottom: "1rem" }}
-			>
-				Ma bibliothèque
-			</h1>
+			{/* mb-4 replaces the inline style={{ marginBottom: "1rem" }} */}
+			<h1 className="text-2xl font-bold text-primary mb-4">Ma bibliothèque</h1>
 
 			{/* Series section */}
 			{overview.series.length > 0 && (
@@ -81,10 +89,12 @@ function LibraryPage() {
 					</h2>
 					<div className="flex flex-col gap-3">
 						{overview.series.map((serie) => (
-							<div
+							// Link instead of div + onClick for semantics, keyboard nav,
+							// and middle-click support (open in new tab)
+							<Link
 								key={serie.id}
-								className="bg-surface rounded-xl p-3 cursor-pointer"
-								onClick={() => navigate(`/serie/${serie.id}`)}
+								to={`/serie/${serie.id}`}
+								className="bg-surface rounded-xl p-3 block"
 							>
 								<div className="flex gap-3 items-center">
 									{/* Cover */}
@@ -111,7 +121,8 @@ function LibraryPage() {
 											tome(s)
 										</p>
 
-										{/* Progress bar */}
+										{/* Progress bar — inline style is justified here because
+										    Tailwind cannot generate dynamic widths at runtime */}
 										{serie.total_volumes && serie.total_volumes > 0 && (
 											<div className="w-full bg-surface-elevated rounded-full h-1.5">
 												<div
@@ -124,7 +135,7 @@ function LibraryPage() {
 										)}
 									</div>
 								</div>
-							</div>
+							</Link>
 						))}
 					</div>
 				</div>
@@ -138,10 +149,10 @@ function LibraryPage() {
 					</h2>
 					<div className="flex flex-col gap-3">
 						{overview.standalone.map((book) => (
-							<div
+							<Link
 								key={book.id}
-								className="bg-surface rounded-xl p-3 flex gap-3 items-center cursor-pointer"
-								onClick={() => navigate(`/book/${book.id}`)}
+								to={`/book/${book.id}`}
+								className="bg-surface rounded-xl p-3 flex gap-3 items-center block"
 							>
 								{book.cover ? (
 									<img
@@ -155,7 +166,7 @@ function LibraryPage() {
 									</div>
 								)}
 								<p className="font-medium text-sm text-primary">{book.title}</p>
-							</div>
+							</Link>
 						))}
 					</div>
 				</div>
