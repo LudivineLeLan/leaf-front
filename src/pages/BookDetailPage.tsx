@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import DOMPurify from "dompurify";
 import api from "@/api/axios";
+import { cn } from "@/lib/utils";
 
 interface Author {
 	id: number;
@@ -28,20 +30,27 @@ interface BookDetail {
 	userStatus: string | null;
 }
 
+// Labels for the reading status buttons
+const STATUS_LABELS: Record<string, string> = {
+	to_read: "À lire",
+	reading: "En cours",
+	finished: "Lu",
+};
+
 function BookDetailPage() {
 	const { bookId } = useParams<{ bookId: string }>();
 	const navigate = useNavigate();
 	const [book, setBook] = useState<BookDetail | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [followedAuthors, setFollowedAuthors] = useState<number[]>([]);
-	const [userStatus, setUserStatus] = useState<string | null>(
-		book?.userStatus ?? null,
-	);
+	// Initialized to null — will be set once the book data is fetched
+	const [userStatus, setUserStatus] = useState<string | null>(null);
 
+	// Fetch book details on mount or when bookId changes
 	useEffect(() => {
 		const fetchBook = async () => {
 			try {
-				const { data } = await api.get(`/books/id/${bookId}`);
+				const { data } = await api.get<BookDetail>(`/books/id/${bookId}`);
 				setBook(data);
 				setUserStatus(data.userStatus ?? null);
 			} catch (error) {
@@ -53,6 +62,22 @@ function BookDetailPage() {
 		fetchBook();
 	}, [bookId]);
 
+	// Fetch followed authors on mount — runs in parallel with fetchBook
+	useEffect(() => {
+		const fetchFollows = async () => {
+			try {
+				const { data } = await api.get("/follows");
+				setFollowedAuthors(
+					data.authors.map((author: { authorId: number }) => author.authorId),
+				);
+			} catch (error) {
+				console.error(error);
+			}
+		};
+		fetchFollows();
+	}, []);
+
+	// Optimistically update local status before the server confirms
 	const handleStatusChange = async (newStatus: string) => {
 		try {
 			await api.put(`/library/${bookId}`, { status: newStatus });
@@ -62,20 +87,7 @@ function BookDetailPage() {
 		}
 	};
 
-	useEffect(() => {
-		const fetchFollows = async () => {
-			try {
-				const { data } = await api.get("/follows");
-				setFollowedAuthors(
-					data.authors.map((a: { authorId: number }) => a.authorId),
-				);
-			} catch (error) {
-				console.error(error);
-			}
-		};
-		fetchFollows();
-	}, []);
-
+	// Toggle follow/unfollow for a given author
 	const handleFollowAuthor = async (authorId: number) => {
 		try {
 			if (followedAuthors.includes(authorId)) {
@@ -90,6 +102,7 @@ function BookDetailPage() {
 		}
 	};
 
+	// Remove the book from the user's library and redirect to library page
 	const handleRemoveFromLibrary = async () => {
 		try {
 			await api.delete(`/library/${bookId}`);
@@ -100,9 +113,9 @@ function BookDetailPage() {
 	};
 
 	if (loading)
-		return <p className="text-center text-gray-400 mt-10">Chargement...</p>;
+		return <p className="text-center text-muted mt-10">Chargement...</p>;
 	if (!book)
-		return <p className="text-center text-gray-400 mt-10">Livre non trouvé</p>;
+		return <p className="text-center text-muted mt-10">Livre non trouvé</p>;
 
 	return (
 		<div className="pb-24 bg-background min-h-screen">
@@ -136,19 +149,19 @@ function BookDetailPage() {
 			</div>
 
 			<div className="px-4 flex flex-col gap-5">
-				{/* Serie */}
+				{/* Serie — links to the serie page */}
 				{book.serie && (
-					<p
-						className="text-sm text-accent font-medium cursor-pointer hover:underline"
-						onClick={() => navigate(`/serie/${book.serie!.id}`)}
+					<Link
+						to={`/serie/${book.serie.id}`}
+						className="text-sm text-accent font-medium hover:underline"
 					>
 						{book.serie.name}
 						{book.seriesPosition && ` • Tome ${book.seriesPosition}`}
 						{book.serie.total_volumes && ` / ${book.serie.total_volumes}`}
-					</p>
+					</Link>
 				)}
 
-				{/* Status */}
+				{/* Reading status buttons — only shown if the book is in the library */}
 				{book.isInLibrary && (
 					<div className="flex gap-2">
 						{(["to_read", "reading", "finished"] as const).map((statusKey) => (
@@ -156,29 +169,20 @@ function BookDetailPage() {
 								key={statusKey}
 								type="button"
 								onClick={() => handleStatusChange(statusKey)}
-								style={{
-									padding: "4px 12px",
-									borderRadius: "999px",
-									fontSize: "11px",
-									border: "1px solid",
-									cursor: "pointer",
-									backgroundColor:
-										userStatus === statusKey ? "#34d399" : "transparent",
-									color: userStatus === statusKey ? "#0f0f0f" : "#52525b",
-									borderColor: userStatus === statusKey ? "#34d399" : "#3f3f46",
-								}}
+								className={cn(
+									"px-3 py-1 rounded-full text-xs border cursor-pointer",
+									userStatus === statusKey
+										? "bg-accent text-background border-accent"
+										: "bg-transparent text-muted border-border",
+								)}
 							>
-								{statusKey === "to_read"
-									? "À lire"
-									: statusKey === "reading"
-										? "En cours"
-										: "Lu"}
+								{STATUS_LABELS[statusKey]}
 							</button>
 						))}
 					</div>
 				)}
 
-				{/* Authors */}
+				{/* Authors — each links to the author page with a follow toggle */}
 				{book.authors?.length > 0 && (
 					<div className="flex flex-col gap-3">
 						{book.authors.map((author) => (
@@ -186,31 +190,21 @@ function BookDetailPage() {
 								key={author.id}
 								className="flex items-center justify-between"
 							>
-								<p
-									className="text-sm text-secondary cursor-pointer hover:text-accent"
-									onClick={() => navigate(`/author/${author.id}`)}
+								<Link
+									to={`/author/${author.id}`}
+									className="text-sm text-secondary hover:text-accent"
 								>
 									{author.firstname} {author.name}
-								</p>
+								</Link>
 								<button
 									type="button"
 									onClick={() => handleFollowAuthor(author.id)}
-									style={{
-										padding: "4px 12px",
-										borderRadius: "999px",
-										fontSize: "11px",
-										border: "1px solid",
-										cursor: "pointer",
-										backgroundColor: followedAuthors.includes(author.id)
-											? "transparent"
-											: "#34d399",
-										color: followedAuthors.includes(author.id)
-											? "#52525b"
-											: "#0f0f0f",
-										borderColor: followedAuthors.includes(author.id)
-											? "#3f3f46"
-											: "#34d399",
-									}}
+									className={cn(
+										"px-3 py-1 rounded-full text-xs border cursor-pointer",
+										followedAuthors.includes(author.id)
+											? "bg-transparent text-muted border-border"
+											: "bg-accent text-background border-accent",
+									)}
 								>
 									{followedAuthors.includes(author.id) ? "Suivi ✓" : "+ Suivre"}
 								</button>
@@ -229,34 +223,25 @@ function BookDetailPage() {
 					</p>
 				)}
 
-				{/* Synopsis */}
+				{/* Synopsis — sanitized with DOMPurify before injection to prevent XSS.
+				    Google Books synopses may contain basic HTML tags like <br> or <b>. */}
 				{book.synopsis ? (
 					<div
 						className="text-sm text-secondary leading-relaxed"
-						dangerouslySetInnerHTML={{ __html: book.synopsis }}
+						dangerouslySetInnerHTML={{
+							__html: DOMPurify.sanitize(book.synopsis),
+						}}
 					/>
 				) : (
 					<p className="text-sm text-muted italic">Aucun synopsis disponible</p>
 				)}
-				{/* Remove from library */}
+
+				{/* Remove from library — only shown if the book is in the library */}
 				{book.isInLibrary && (
 					<button
 						type="button"
 						onClick={handleRemoveFromLibrary}
-						style={{
-							display: "flex",
-							alignItems: "center",
-							justifyContent: "center",
-							gap: "8px",
-							padding: "12px 16px",
-							borderRadius: "12px",
-							fontSize: "14px",
-							border: "1px solid #3f1010",
-							cursor: "pointer",
-							backgroundColor: "#1c0a0a",
-							color: "#f87171",
-							width: "100%",
-						}}
+						className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm border border-red-900 bg-red-950 text-red-400 cursor-pointer"
 					>
 						Retirer de ma bibliothèque
 					</button>
