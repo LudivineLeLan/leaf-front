@@ -7,12 +7,16 @@ import { getEmailWarning } from "@/utils/validation";
 function LoginPage() {
 	const { login } = useAuth();
 	const location = useLocation();
-	const successMessage = location.state?.message;
+	// Cast to extract the optional message passed via navigate state (e.g. after registration)
+	const successMessage = (
+		location.state as { message?: string } | null
+	)?.message;
 	const navigate = useNavigate();
 	const [formData, setFormData] = useState({ email: "", password: "" });
 	const [error, setError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
 
+	// Validated on every keystroke — blocks submit if the email format is invalid
 	const emailWarning = getEmailWarning(formData.email);
 
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -21,6 +25,7 @@ function LoginPage() {
 
 	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
+		// Guard against submitting with an invalid email
 		if (emailWarning) return;
 		setLoading(true);
 		setError(null);
@@ -45,6 +50,7 @@ function LoginPage() {
 				<p className="text-secondary mt-2">Ta bibliothèque personnelle</p>
 			</div>
 
+			{/* Success message passed via navigation state, e.g. after registration */}
 			{successMessage && (
 				<p className="text-accent text-sm text-center mb-4 bg-surface p-3 rounded-lg border border-accent">
 					{successMessage}
@@ -53,13 +59,21 @@ function LoginPage() {
 
 			<form onSubmit={handleSubmit} className="flex flex-col gap-4">
 				<div className="flex flex-col gap-1">
-					<label className="text-sm font-medium text-secondary">Email</label>
+					{/* htmlFor + id links the label to the input for accessibility and click-to-focus */}
+					<label
+						htmlFor="email"
+						className="text-sm font-medium text-secondary"
+					>
+						Email
+					</label>
 					<input
+						id="email"
 						type="email"
 						name="email"
 						value={formData.email}
 						onChange={handleChange}
 						placeholder="ton@email.com"
+						autoComplete="email"
 						required
 						className="bg-surface border border-border rounded-lg px-4 py-2.5 text-sm text-primary placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent"
 					/>
@@ -69,15 +83,21 @@ function LoginPage() {
 				</div>
 
 				<div className="flex flex-col gap-1">
-					<label className="text-sm font-medium text-secondary">
+					<label
+						htmlFor="password"
+						className="text-sm font-medium text-secondary"
+					>
 						Mot de passe
 					</label>
 					<input
+						id="password"
 						type="password"
 						name="password"
 						value={formData.password}
 						onChange={handleChange}
 						placeholder="••••••••"
+						// Tells password managers this is a login form, not a new password field
+						autoComplete="current-password"
 						required
 						className="bg-surface border border-border rounded-lg px-4 py-2.5 text-sm text-primary placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent"
 					/>
@@ -85,6 +105,7 @@ function LoginPage() {
 
 				{error && <p className="text-red-400 text-sm">{error}</p>}
 
+				{/* Disabled while loading or if email validation fails */}
 				<button
 					type="submit"
 					disabled={loading || !!emailWarning}
