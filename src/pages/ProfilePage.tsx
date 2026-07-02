@@ -7,20 +7,21 @@ function ProfilePage() {
 	const navigate = useNavigate();
 
 	const handleLogout = async () => {
-		await logout();
-		navigate("/login");
+		try {
+			await logout();
+		} finally {
+			// Always redirect to login, even if the logout request fails —
+			// AuthContext already clears local state in its own finally block
+			navigate("/login");
+		}
 	};
 
 	return (
 		<div className="px-4 pt-6 pb-24 bg-background min-h-screen">
-			<h1
-				className="text-2xl font-bold text-primary"
-				style={{ marginBottom: "1rem" }}
-			>
-				Profil
-			</h1>
+			{/* mb-4 replaces inline style={{ marginBottom: "1rem" }} */}
+			<h1 className="text-2xl font-bold text-primary mb-4">Profil</h1>
 
-			{/* Avatar + infos */}
+			{/* Avatar + user info */}
 			<div className="flex items-center gap-4 mb-8 bg-surface rounded-xl p-4">
 				<div className="w-16 h-16 rounded-full bg-surface-elevated flex items-center justify-center">
 					<User size={32} className="text-accent" />
@@ -31,23 +32,11 @@ function ProfilePage() {
 				</div>
 			</div>
 
-			{/* Logout button */}
+			{/* Logout button — same destructive style as the remove-from-library button */}
 			<button
 				type="button"
 				onClick={handleLogout}
-				style={{
-					display: "flex",
-					alignItems: "center",
-					gap: "8px",
-					padding: "12px 16px",
-					borderRadius: "12px",
-					fontSize: "14px",
-					border: "1px solid #3f1010",
-					cursor: "pointer",
-					backgroundColor: "#1c0a0a",
-					color: "#f87171",
-					width: "100%",
-				}}
+				className="w-full flex items-center gap-2 px-4 py-3 rounded-xl text-sm border border-red-900 bg-red-950 text-red-400 cursor-pointer"
 			>
 				<LogOut size={16} />
 				Se déconnecter
