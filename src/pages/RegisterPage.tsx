@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import axios from "axios";
 import api from "@/api/axios";
 import {
 	getEmailWarning,
@@ -17,6 +18,7 @@ function RegisterPage() {
 	const [error, setError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
 
+	// Validated on every keystroke — blocks submit if any field is invalid
 	const usernameWarning = getUsernameWarning(formData.username);
 	const emailWarning = getEmailWarning(formData.email);
 	const passwordWarning = getPasswordWarning(formData.password);
@@ -29,18 +31,26 @@ function RegisterPage() {
 
 	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
+		// Guard against submitting with invalid fields
 		if (hasWarnings) return;
 		setLoading(true);
 		setError(null);
 
 		try {
 			await api.post("/auth/register", formData);
+			// Redirect to login with a success message passed via navigation state
 			navigate("/login", {
 				state: { message: "Compte créé avec succès ! Tu peux te connecter." },
 			});
-		} catch (err) {
-			const error = err as { response?: { data?: { error?: string } } };
-			setError(error.response?.data?.error || "Une erreur est survenue");
+		} catch (caughtError) {
+			// axios.isAxiosError() is an official type guard — safer than casting with `as`
+			if (axios.isAxiosError(caughtError)) {
+				setError(
+					caughtError.response?.data?.error || "Une erreur est survenue",
+				);
+			} else {
+				setError("Une erreur est survenue");
+			}
 		} finally {
 			setLoading(false);
 		}
@@ -57,15 +67,21 @@ function RegisterPage() {
 
 			<form onSubmit={handleSubmit} className="flex flex-col gap-4">
 				<div className="flex flex-col gap-1">
-					<label className="text-sm font-medium text-secondary">
+					{/* htmlFor + id links the label to the input for accessibility and click-to-focus */}
+					<label
+						htmlFor="username"
+						className="text-sm font-medium text-secondary"
+					>
 						Nom d'utilisateur
 					</label>
 					<input
+						id="username"
 						type="text"
 						name="username"
 						value={formData.username}
 						onChange={handleChange}
 						placeholder="ton pseudo"
+						autoComplete="username"
 						required
 						className="bg-surface border border-border rounded-lg px-4 py-2.5 text-sm text-primary placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent"
 					/>
@@ -75,13 +91,17 @@ function RegisterPage() {
 				</div>
 
 				<div className="flex flex-col gap-1">
-					<label className="text-sm font-medium text-secondary">Email</label>
+					<label htmlFor="email" className="text-sm font-medium text-secondary">
+						Email
+					</label>
 					<input
+						id="email"
 						type="email"
 						name="email"
 						value={formData.email}
 						onChange={handleChange}
 						placeholder="ton@email.com"
+						autoComplete="email"
 						required
 						className="bg-surface border border-border rounded-lg px-4 py-2.5 text-sm text-primary placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent"
 					/>
@@ -91,15 +111,22 @@ function RegisterPage() {
 				</div>
 
 				<div className="flex flex-col gap-1">
-					<label className="text-sm font-medium text-secondary">
+					<label
+						htmlFor="password"
+						className="text-sm font-medium text-secondary"
+					>
 						Mot de passe
 					</label>
 					<input
+						id="password"
 						type="password"
 						name="password"
 						value={formData.password}
 						onChange={handleChange}
 						placeholder="••••••••"
+						// "new-password" tells browsers and password managers this is
+						// a registration form, not a login — triggers password suggestion
+						autoComplete="new-password"
 						required
 						className="bg-surface border border-border rounded-lg px-4 py-2.5 text-sm text-primary placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent"
 					/>
@@ -110,6 +137,7 @@ function RegisterPage() {
 
 				{error && <p className="text-red-400 text-sm">{error}</p>}
 
+				{/* Disabled while loading or if any validation warning is active */}
 				<button
 					type="submit"
 					disabled={loading || hasWarnings}
