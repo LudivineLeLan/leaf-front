@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "@/api/axios";
+import { cn } from "@/lib/utils";
 
 interface Stats {
 	total: number;
@@ -10,6 +11,14 @@ interface Stats {
 	authorsFollowed: number;
 }
 
+// Each card uses a Tailwind class instead of a hardcoded hex color,
+// keeping the UI consistent with the design token system
+interface StatCard {
+	label: string;
+	value: number;
+	className: string;
+}
+
 function StatsPage() {
 	const [stats, setStats] = useState<Stats | null>(null);
 	const [loading, setLoading] = useState(true);
@@ -17,10 +26,10 @@ function StatsPage() {
 	useEffect(() => {
 		const fetchStats = async () => {
 			try {
-				const { data } = await api.get("/stats");
+				const { data } = await api.get<Stats>("/stats");
 				setStats(data);
-			} catch (error) {
-				console.error(error);
+			} catch (caughtError) {
+				console.error(caughtError);
 			} finally {
 				setLoading(false);
 			}
@@ -29,29 +38,31 @@ function StatsPage() {
 	}, []);
 
 	if (loading)
-		return <p className="text-center text-gray-400 mt-10">Chargement...</p>;
+		return <p className="text-center text-muted mt-10">Chargement...</p>;
 	if (!stats)
-		return (
-			<p className="text-center text-gray-400 mt-10">Erreur de chargement</p>
-		);
+		return <p className="text-center text-muted mt-10">Erreur de chargement</p>;
 
-	const statCards = [
-		{ label: "Livres au total", value: stats.total, color: "#34d399" },
-		{ label: "À lire", value: stats.toRead, color: "#818cf8" },
-		{ label: "En cours", value: stats.reading, color: "#fbbf24" },
-		{ label: "Lus", value: stats.finished, color: "#34d399" },
-		{ label: "Séries suivies", value: stats.seriesFollowed, color: "#c084fc" },
-		{ label: "Auteurs suivis", value: stats.authorsFollowed, color: "#f472b6" },
+	const statCards: StatCard[] = [
+		{ label: "Livres au total", value: stats.total, className: "text-accent" },
+		{ label: "À lire", value: stats.toRead, className: "text-indigo-400" },
+		{ label: "En cours", value: stats.reading, className: "text-yellow-400" },
+		{ label: "Lus", value: stats.finished, className: "text-accent" },
+		{
+			label: "Séries suivies",
+			value: stats.seriesFollowed,
+			className: "text-purple-400",
+		},
+		{
+			label: "Auteurs suivis",
+			value: stats.authorsFollowed,
+			className: "text-pink-400",
+		},
 	];
 
 	return (
 		<div className="px-4 pt-6 pb-24 bg-background min-h-screen">
-			<h1
-				className="text-2xl font-bold text-primary"
-				style={{ marginBottom: "1rem" }}
-			>
-				Statistiques
-			</h1>
+			{/* mb-4 replaces inline style={{ marginBottom: "1rem" }} */}
+			<h1 className="text-2xl font-bold text-primary mb-4">Statistiques</h1>
 
 			<div className="grid grid-cols-2 gap-4">
 				{statCards.map((card) => (
@@ -59,10 +70,8 @@ function StatsPage() {
 						key={card.label}
 						className="bg-surface rounded-xl p-4 border border-border"
 					>
-						<p
-							className="text-3xl font-bold mb-1"
-							style={{ color: card.color }}
-						>
+						{/* cn() applies the per-card color class alongside the shared styles */}
+						<p className={cn("text-3xl font-bold mb-1", card.className)}>
 							{card.value}
 						</p>
 						<p className="text-xs text-secondary">{card.label}</p>
