@@ -10,7 +10,9 @@ import { cn } from "@/lib/utils";
 interface Volume {
 	googleBooksId: string;
 	title: string;
+	authors: string[];
 	cover: string | null;
+	description: string | null;
 	seriesPosition: number | null;
 	isInLibrary: boolean;
 	libraryBookId: number | null;
@@ -60,7 +62,9 @@ function SeriePage() {
 						return {
 							googleBooksId: googleBook.googleBooksId,
 							title: googleBook.title,
+							authors: googleBook.authors,
 							cover: googleBook.thumbnail,
+							description: googleBook.description,
 							seriesPosition:
 								bookInLibrary?.seriesPosition || seriesInfo?.position || null,
 							isInLibrary: !!bookInLibrary,
@@ -134,13 +138,15 @@ function SeriePage() {
 
 	// Import a volume and add it to the library, then update local state
 	const handleAddBook = async (volume: Volume, event: React.MouseEvent) => {
-		// Prevent the click from bubbling up to the volume row's navigation handler
 		event.stopPropagation();
 		try {
 			const { data: importedBook } = await api.post("/books/import", {
 				googleBooksId: volume.googleBooksId,
 				title: volume.title,
+				authors: volume.authors,
 				thumbnail: volume.cover,
+				description: volume.description,
+				publishedDate: null,
 			});
 			await api.post(`/library/${importedBook.id}`, { status: "to_read" });
 			setSerie((prev) => {
@@ -168,7 +174,6 @@ function SeriePage() {
 		libraryBookId: number,
 		event: React.MouseEvent,
 	) => {
-		// Prevent the click from bubbling up to the volume row's navigation handler
 		event.stopPropagation();
 		try {
 			await api.delete(`/library/${libraryBookId}`);
@@ -199,7 +204,10 @@ function SeriePage() {
 			const { data: importedBook } = await api.post("/books/import", {
 				googleBooksId: volume.googleBooksId,
 				title: volume.title,
+				authors: volume.authors,
 				thumbnail: volume.cover,
+				description: volume.description,
+				publishedDate: null,
 			});
 			navigate(`/book/${importedBook.id}`);
 		} catch (caughtError) {
@@ -262,7 +270,6 @@ function SeriePage() {
 									);
 							}}
 							autoFocus
-							// Tailwind replaces the inline style — border-border uses the design token
 							className="w-12 bg-transparent border border-border rounded text-primary px-1 text-sm"
 						/>
 					) : (
@@ -301,60 +308,64 @@ function SeriePage() {
 			{/* Volumes list */}
 			<div className="flex flex-col gap-3 px-4">
 				{serie.volumes.map((volume) => (
-					// button instead of div for semantics and keyboard navigation
-					<button
+					// Outer div to avoid nesting buttons inside a button
+					<div
 						key={volume.googleBooksId}
-						type="button"
-						className="flex gap-3 items-center bg-surface rounded-xl p-3 w-full text-left"
-						onClick={() => handleOpenVolume(volume)}
+						className="flex gap-3 items-center bg-surface rounded-xl p-3"
 					>
-						{/* Cover */}
-						{volume.cover ? (
-							<img
-								src={volume.cover}
-								alt={volume.title}
-								className="w-12 h-18 object-cover rounded-md shrink-0"
-							/>
-						) : (
-							<div className="w-12 h-18 bg-surface-elevated rounded-md shrink-0 flex items-center justify-center text-muted text-xs">
-								No cover
-							</div>
-						)}
-
-						{/* Infos */}
-						<div className="flex-1">
-							<p className="font-medium text-sm text-primary">{volume.title}</p>
-							{volume.seriesPosition && (
-								<p className="text-xs text-muted">
-									Tome {volume.seriesPosition}
-								</p>
+						{/* Clickable area for navigation — covers cover and title only */}
+						<button
+							type="button"
+							className="flex gap-3 items-center flex-1 text-left"
+							onClick={() => handleOpenVolume(volume)}
+						>
+							{volume.cover ? (
+								<img
+									src={volume.cover}
+									alt={volume.title}
+									className="w-12 h-18 object-cover rounded-md shrink-0"
+								/>
+							) : (
+								<div className="w-12 h-18 bg-surface-elevated rounded-md shrink-0 flex items-center justify-center text-muted text-xs">
+									No cover
+								</div>
 							)}
-							<div className="flex items-center justify-between mt-1">
-								{volume.isInLibrary ? (
-									<>
-										<p className="text-xs text-accent">
-											✓ Dans ta bibliothèque
-										</p>
-										{volume.libraryBookId && (
-											<button
-												type="button"
-												onClick={(event) =>
-													handleRemoveBook(volume.libraryBookId!, event)
-												}
-												className="text-muted hover:text-red-400 transition-colors"
-											>
-												<Trash2 size={14} />
-											</button>
-										)}
-									</>
-								) : (
-									<AddButton
-										onClick={(event) => handleAddBook(volume, event)}
-									/>
+							<div className="flex-1">
+								<p className="font-medium text-sm text-primary">
+									{volume.title}
+								</p>
+								{volume.seriesPosition && (
+									<p className="text-xs text-muted">
+										Tome {volume.seriesPosition}
+									</p>
 								)}
 							</div>
+						</button>
+
+						{/* Library actions — outside the navigation button to avoid nesting */}
+						<div className="flex items-center shrink-0">
+							{volume.isInLibrary ? (
+								<>
+									<p className="text-xs text-accent">✓ Dans ta bibliothèque</p>
+									{volume.libraryBookId && (
+										<button
+											type="button"
+											onClick={(event) =>
+												handleRemoveBook(volume.libraryBookId!, event)
+											}
+											className="text-muted hover:text-red-400 transition-colors ml-2"
+										>
+											<Trash2 size={14} />
+										</button>
+									)}
+								</>
+							) : (
+								<AddButton
+									onClick={(event) => handleAddBook(volume, event)}
+								/>
+							)}
 						</div>
-					</button>
+					</div>
 				))}
 			</div>
 		</div>

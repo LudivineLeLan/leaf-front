@@ -9,8 +9,10 @@ import { googleBooksSearchByAuthor } from "@/api/googleBooks";
 interface AuthorBook {
 	googleBooksId: string;
 	title: string;
+	authors: string[];
 	cover: string | null;
 	publishedDate: string | null;
+	description: string | null;
 	isInLibrary: boolean;
 }
 
@@ -39,6 +41,8 @@ function AuthorPage() {
 
 				// 2. Search books from Google Books frontend-side
 				const googleResults = await googleBooksSearchByAuthor(fullName);
+				console.log("googleResults:", googleResults);
+				console.log("fullName:", fullName);
 
 				// 3. Deduplicate
 				const seen = new Set();
@@ -60,6 +64,8 @@ function AuthorPage() {
 					}),
 				);
 
+				console.log("filtered:", filtered);
+
 				// 5. Check library
 				let libraryGoogleIds: string[] = [];
 				if (user) {
@@ -74,8 +80,10 @@ function AuthorPage() {
 					filtered.map((book) => ({
 						googleBooksId: book.googleBooksId,
 						title: book.title,
+						authors: book.authors, // ajouté
 						cover: book.thumbnail,
 						publishedDate: book.publishedDate,
+						description: book.description, // ajouté
 						isInLibrary: libraryGoogleIds.includes(book.googleBooksId),
 					})),
 				);
@@ -93,7 +101,10 @@ function AuthorPage() {
 			const { data: importedBook } = await api.post("/books/import", {
 				googleBooksId: book.googleBooksId,
 				title: book.title,
+				authors: book.authors, // ajouté
 				thumbnail: book.cover,
+				description: book.description, // ajouté
+				publishedDate: book.publishedDate, // ajouté
 			});
 			await api.post(`/library/${importedBook.id}`, { status: "to_read" });
 			setBooks((prev) =>

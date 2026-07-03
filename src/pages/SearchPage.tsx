@@ -75,7 +75,6 @@ function SearchPage() {
 	}, [debouncedQuery, user]);
 
 	const handleAddBook = async (book: Book) => {
-		// Redirect unauthenticated users to login before allowing library actions
 		if (!user) {
 			navigate("/login");
 			return;
@@ -87,12 +86,13 @@ function SearchPage() {
 				title: book.title,
 				authors: book.authors,
 				thumbnail: book.thumbnail,
+				description: book.description,
+				publishedDate: book.publishedDate,
 			});
 
 			// 2. Add the imported book to the user's library
 			await api.post(`/library/${importedBook.id}`, { status: "to_read" });
 
-			// Optimistically update the local result to reflect the new library state
 			setResults((prev) =>
 				prev.map((result) =>
 					result.googleBooksId === book.googleBooksId
@@ -101,7 +101,6 @@ function SearchPage() {
 				),
 			);
 
-			// Show a temporary success message for 3 seconds
 			setSuccessMessage(`"${book.title}" ajouté à ta bibliothèque !`);
 			setTimeout(() => setSuccessMessage(null), 3000);
 		} catch (caughtError) {
@@ -110,7 +109,6 @@ function SearchPage() {
 	};
 
 	const handleOpenBook = async (book: Book) => {
-		// Redirect unauthenticated users to login before allowing navigation
 		if (!user) {
 			navigate("/login");
 			return;
@@ -123,6 +121,8 @@ function SearchPage() {
 				title: book.title,
 				authors: book.authors,
 				thumbnail: book.thumbnail,
+				description: book.description,
+				publishedDate: book.publishedDate,
 			});
 			navigate(`/book/${importedBook.id}`);
 		} catch (caughtError) {

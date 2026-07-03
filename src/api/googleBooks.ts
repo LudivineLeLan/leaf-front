@@ -30,7 +30,9 @@ function mapToGoogleBook(item: GoogleBooksApiItem): GoogleBook {
 		googleBooksId: item.id,
 		title: item.volumeInfo?.title || "Titre inconnu",
 		authors: item.volumeInfo?.authors || [],
-		thumbnail: item.volumeInfo?.imageLinks?.thumbnail || null,
+		thumbnail:
+			item.volumeInfo?.imageLinks?.thumbnail?.replace("http://", "https://") ||
+			null,
 		publishedDate: item.volumeInfo?.publishedDate || null,
 		description: item.volumeInfo?.description || null,
 		language: item.volumeInfo?.language || null,
@@ -56,11 +58,17 @@ async function fetchGoogleBooks(
 export const googleBooksSearch = (query: string): Promise<GoogleBook[]> =>
 	fetchGoogleBooks(query, 10);
 
-export const googleBooksSearchByAuthor = (
+export const googleBooksSearchByAuthor = async (
 	authorName: string,
-): Promise<GoogleBook[]> =>
-	// authorName is encoded separately so the "inauthor:" operator stays intact
-	fetchGoogleBooks(`inauthor:${encodeURIComponent(authorName)}`, 20);
+): Promise<GoogleBook[]> => {
+	const response = await fetch(
+		`${BASE_URL}?q=inauthor:${encodeURIComponent(authorName)}&maxResults=20&key=${API_KEY}`,
+	);
+	if (!response.ok) throw new Error("Google Books API error");
+	const data = await response.json();
+	if (!data.items) return [];
+	return data.items.map(mapToGoogleBook);
+};
 
 export const googleBooksSearchSerie = (query: string): Promise<GoogleBook[]> =>
 	fetchGoogleBooks(query, 40);
