@@ -8,7 +8,15 @@ function AddButton({
 	return (
 		<button
 			onClick={onClick}
-			className="bg-accent hover:bg-accent-hover text-background rounded-full px-4 py-1 text-xs font-semibold cursor-pointer transition-colors"
+			style={{
+				padding: "4px 12px",
+				borderRadius: "999px",
+				fontSize: "11px",
+				border: "1px solid #34d399",
+				cursor: "pointer",
+				backgroundColor: "#34d399",
+				color: "#0f0f0f",
+			}}
 		>
 			+ Ajouter
 		</button>

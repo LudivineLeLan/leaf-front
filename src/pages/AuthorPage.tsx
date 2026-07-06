@@ -41,8 +41,6 @@ function AuthorPage() {
 
 				// 2. Search books from Google Books frontend-side
 				const googleResults = await googleBooksSearchByAuthor(fullName);
-				console.log("googleResults:", googleResults);
-				console.log("fullName:", fullName);
 
 				// 3. Deduplicate
 				const seen = new Set();
@@ -63,8 +61,6 @@ function AuthorPage() {
 						);
 					}),
 				);
-
-				console.log("filtered:", filtered);
 
 				// 5. Check library
 				let libraryGoogleIds: string[] = [];

@@ -169,12 +169,17 @@ function BookDetailPage() {
 								key={statusKey}
 								type="button"
 								onClick={() => handleStatusChange(statusKey)}
-								className={cn(
-									"px-3 py-1 rounded-full text-xs border cursor-pointer",
-									userStatus === statusKey
-										? "bg-accent text-background border-accent"
-										: "bg-transparent text-muted border-border",
-								)}
+								style={{
+									padding: "4px 12px",
+									borderRadius: "999px",
+									fontSize: "11px",
+									border: "1px solid",
+									cursor: "pointer",
+									backgroundColor:
+										userStatus === statusKey ? "#34d399" : "transparent",
+									color: userStatus === statusKey ? "#0f0f0f" : "#52525b",
+									borderColor: userStatus === statusKey ? "#34d399" : "#3f3f46",
+								}}
 							>
 								{STATUS_LABELS[statusKey]}
 							</button>
@@ -199,12 +204,22 @@ function BookDetailPage() {
 								<button
 									type="button"
 									onClick={() => handleFollowAuthor(author.id)}
-									className={cn(
-										"px-3 py-1 rounded-full text-xs border cursor-pointer",
-										followedAuthors.includes(author.id)
-											? "bg-transparent text-muted border-border"
-											: "bg-accent text-background border-accent",
-									)}
+									style={{
+										padding: "4px 12px",
+										borderRadius: "999px",
+										fontSize: "11px",
+										border: "1px solid",
+										cursor: "pointer",
+										backgroundColor: followedAuthors.includes(author.id)
+											? "transparent"
+											: "#34d399",
+										color: followedAuthors.includes(author.id)
+											? "#52525b"
+											: "#0f0f0f",
+										borderColor: followedAuthors.includes(author.id)
+											? "#3f3f46"
+											: "#34d399",
+									}}
 								>
 									{followedAuthors.includes(author.id) ? "Suivi ✓" : "+ Suivre"}
 								</button>

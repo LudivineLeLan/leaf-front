@@ -240,12 +240,16 @@ function SeriePage() {
 				<button
 					type="button"
 					onClick={handleFollow}
-					className={cn(
-						"px-3 py-1.5 rounded-full text-xs border cursor-pointer",
-						isFollowing
-							? "bg-transparent text-muted border-border"
-							: "bg-accent text-background border-accent",
-					)}
+					style={{
+						padding: "6px 14px",
+						borderRadius: "999px",
+						fontSize: "12px",
+						border: "1px solid",
+						cursor: "pointer",
+						backgroundColor: isFollowing ? "transparent" : "#34d399",
+						color: isFollowing ? "#52525b" : "#0f0f0f",
+						borderColor: isFollowing ? "#3f3f46" : "#34d399",
+					}}
 				>
 					{isFollowing ? "Suivi ✓" : "+ Suivre"}
 				</button>
@@ -360,9 +364,7 @@ function SeriePage() {
 									)}
 								</>
 							) : (
-								<AddButton
-									onClick={(event) => handleAddBook(volume, event)}
-								/>
+								<AddButton onClick={(event) => handleAddBook(volume, event)} />
 							)}
 						</div>
 					</div>
