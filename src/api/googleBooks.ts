@@ -31,8 +31,13 @@ function mapToGoogleBook(item: GoogleBooksApiItem): GoogleBook {
 		title: item.volumeInfo?.title || "Titre inconnu",
 		authors: item.volumeInfo?.authors || [],
 		thumbnail:
-			item.volumeInfo?.imageLinks?.thumbnail?.replace("http://", "https://") ||
-			null,
+			item.volumeInfo?.imageLinks?.thumbnail
+				?.replace("http://", "https://")
+				?.replace(
+					"books.google.com/books/content",
+					"books.googleusercontent.com/books/content",
+				)
+				?.replace(/&amp;/g, "&") || null,
 		publishedDate: item.volumeInfo?.publishedDate || null,
 		description: item.volumeInfo?.description || null,
 		language: item.volumeInfo?.language || null,
