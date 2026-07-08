@@ -175,7 +175,7 @@ function SearchPage() {
 						    not a navigation to a known URL */}
 						<button
 							type="button"
-							className="flex gap-3 items-start flex-1 text-left"
+							className="flex gap-3 items-start flex-1 text-left cursor-pointer"
 							onClick={() => handleOpenBook(book)}
 						>
 							{book.thumbnail ? (
